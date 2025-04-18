@@ -1,0 +1,16 @@
+lucode,LULC_name,load_n,eff_n,crit_len_n,proportion_subsurface_n
+11,Open Water,0.06,0,150,0
+21,"Developed, Open Space",1.15,0.05,150,0
+22,"Developed, Low Intensity",2.22,0.05,150,0
+23,"Developed, Med Intensity",7,0.05,150,0
+24,"Developed, High Intensity",8,0.05,150,0
+31,Barren lands,8.6,0,150,0
+41,Deciduous Forest ,3.1,0.3,150,0
+42,Evergreen Forest ,1.87,0.25,150,0
+43,Mixed Forest ,1.99,0.3,150,0
+52,Shrublands,0.76,0.15,150,0
+71,Grasslands,1.81,0.1,150,0
+81,Farmlands/Pasture Hay,1.29,0.1,150,0
+82,Farmlands/Cultivated areas,16.84,0.01,150,0
+90,Woody Wetlands,0.23,0.6,150,0
+95,Water-Wetlands,0.35,0.6,150,0

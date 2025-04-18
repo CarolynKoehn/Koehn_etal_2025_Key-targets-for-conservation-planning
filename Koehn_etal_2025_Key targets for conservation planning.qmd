@@ -1,0 +1,573 @@
+---
+title: Carbon stock protection and food production are key targets for conservation planning in a landscape of public and private agricultural lands
+author:
+  - name: Carolyn Koehn
+    email: carolynkoehn@u.boisestate.edu
+    affiliations: 
+        - id: bsu-hes
+          name: Boise State University
+          department: Human-Environment Systems
+          address: 1910 University Drive
+          city: Boise
+          state: Idaho
+          postal-code: 83725
+    role:
+      - conceptualization
+      - data curation
+      - formal analysis
+      - investigation
+      - methodology
+      - visualization
+      - writing – original draft
+    attributes:
+        corresponding: true
+  - name: Trevor Caughlin
+    email: trevorcaughlin@boisestate.edu
+    affiliations:
+        - id: bsu-biol
+          name: Boise State University
+          department: Department of Biological Sciences
+          address: 1910 University Drive
+          city: Boise
+          state: Idaho
+          postal-code: 83725
+    role:
+      - conceptualization
+      - writing – review and editing
+  - name: Sarah Halperin
+    email: sarahhalperin@u.boisestate.edu
+    affiliations:
+        - ref: bsu-hes
+    role:
+      - conceptualization
+      - methodology
+      - writing – review and editing
+  - name: Kelly Hopping
+    email: kellyhopping@boisestate.edu
+    affilations:
+        - ref: bsu-hes
+    role:
+      - conceptualization
+      - writing – review and editing
+  - name: Rebecca Som Castellano
+    email: RsomCastellano@boisestate.edu
+    affilations:
+        - ref: bsu-hes
+    role:
+      - conceptualization
+      - writing – review and editing
+      - funding aquisition
+  - name: Jodi Brandt
+    email: jodibrandt@boisestate.edu
+    affilations:
+        - ref: bsu-hes
+    role:
+      - writing – review and editing
+      - funding aquisition
+      - supervision
+      - conceptualization
+abstract: |
+  Demand for land for urban development, food production, and protected areas is increasing, leading to land scarcity. In response, agricultural lands are increasingly targeted for protection. Yet, which land attributes should be used to identify priority lands to protect remains largely unknown. Here, we apply the nature’s contributions to people [NCP] framework in Idaho’s Snake River Plain, a water-limited, climate-sensitive ecoregion, a public-lands dominated area, and the home of one of the fastest growing human populations in the United States. We quantified 21 NCPs across public and private lands, and used systematic conservation planning to generate cost-efficient land protection solutions. We also developed a sensitivity analysis workflow to determine which NCP inputs were most influential for priority protected area selection. We found that current protected areas were highly effective, protecting over half of 17 out of the 21 NCP. However, food production is severely under-protected. Food production and carbon stock protection had the most influence on conservation planning scenarios. Our results suggest that ignoring climate-related NCP in agricultural land protection decisions, even in sub-regional planning where climate seems relatively homogenous, can limit how private land protection strategies contribute to climate mitigation and adaptation. We show how private land protections complement public lands networks for NCP protection and reveal the importance of including climate considerations in local scale conservation planning. Our reproducible workflows for NCP quantification and conservation planning sensitivity analysis can be used to systematically plan for a broad suite of human benefits with growing competition among land uses.
+---
+
+<!-- https://www.sciencedirect.com/journal/biological-conservation/publish/guide-for-authors -->
+
+# Introduction
+
+Land is a limited resource, and globally, humanity is playing a balancing act among three essential land uses. Highly developed urban areas can provide safe and affordable housing [United Nations Sustainable Development Goal 11, @thacker2019], agricultural areas produce food (UN SDG 2), and protected areas provide diverse benefits, including terrestrial habitat (UN SDG 15), climate change mitigation (UN SDG 13), and sustainable tourism [UN SDG 8, @kettunen2021]. The interplay between urban, agriculture, and protected lands are well documented. Built-up areas currently cover very little of the Earth’s surface (ca. 2%), but they are projected to double in area by 2040 [@vanvliet2017]. Over half of urban expansion is predicted to occur on agricultural lands that currently grow food crops or animal feed crops [@vanvliet2017]. Urban expansion onto croplands is accompanied by agricultural land expansion into new areas and intensified use of remaining agricultural lands [@vanvliet2019; @you2016]. Agricultural lands already cover ca. 50% of global ice-free lands [@ellis2010], and are predicted to increase 10-25% by 2050 [@schmitz2014]. Rapid growth of urban and agricultural lands have been accompanied by the expansion of protected area networks, from ca. 10\% of Earth’s lands in 1990 to ca. 17\% of terrestrial areas in 2020 [@unep2021], and there are calls to protect up to 50% of the Earth [@dinerstein2020]. With a limited amount of land on Earth, meeting the growing needs for food, developed land, and nature conservation is a major challenge for humanity.
+
+One way to resolve increasing conflicts is to expand the public protected area network to include private lands. Within protected areas, the goal is often to protect ecosystems, biodiversity, and the regulating contributions they provide by restricting intensive human use [@dudley2010], yet private lands may be more suited to meeting these goals than current protected areas. Relatively isolated areas with high tourism attractiveness are overrepresented in the global protected area network [@baldi2017], while highly productive lands with access to water and fertile soil are more likely to be privately owned [@norton2000; @robinson2019]. Private lands contain more threatened species and ecosystems than public lands [@graves2019], with some species and ecological communities existing solely on private lands [@ivanova2020]. Yet despite private lands' importance for humans and biodiversity, more land use restrictions, such as limits on development or food production, are in place on public lands [@dietz2023]. Thus, food supplies arise largely from private lands managed for agriculture. There has been growing interest in expanding the private protected lands network via protected agricultural lands [PALs] [@freedgood2020], whose primary goal is to protect farmland and ranchland from further development to promote continued food production and rural community well-being and character [@brabec2002]. As states and localities invest limited resources in implementing new PALs, they will want to identify which private lands provide the most benefits for the least cost to maximize their investment, but there is no systematic way to identify priority PALs.
+
+The framework of nature’s contributions to people [NCP], defined as "all the contributions, both positive and negative, of living nature to quality of life for people" [@diaz2018], is a useful tool to measure the various benefits land can provide [@bruley2021]. NCP formalizes important conceptual advances in its antecedent ecosystem services, such as diverse worldviews, non-instrumental valuation, and the distinction of generalizing and context-specific perspectives [@kadykalo2019]. Some current programs to establish PALs use NCP such as soil quality, farmland quality or certain unique attributes (e.g. provision of valued rural amenities like processing facilities or recreational opportunities), or wildlife habitat [@hellerstein2002; @miller2015], as ranking criteria to decide which lands to invest in. However, many other NCP are often not considered when identifying new PALs. Of particular relevance is land's suitability for climate change mitigation and adaptation. Rising temperatures, decreasing water availability, and more frequent droughts and other natural disasters, can be equally or more detrimental to natural and agricultural lands than human population impacts and the expansion of built-up lands [@requena2023]. However, climate-related NCP, such as carbon [C] storage, the facilitation of species migration, and climate refugia, are rarely considered in the identification of new PALs.
+
+Incorporation of NCP into PALs planning would enable practitioners to identify areas where PALs could provide the most benefits to humans and nature. Systematic conservation planning [SCP] is a proactive framework used in protected area design that quantifies conservation values and identifies protected areas efficiently, to meet conservation goals by maximizing the ratio of benefits to cost [@beyer2016; @kukkala2013]. SCP has been used to prioritize lands that protect biodiversity [e.g. @gonzalez2022], and have also incorporated other NCP, frequently C storage and water provision, to prioritize protections within public-private lands networks [e.g. @williams2020]. However, planning for conservation involves different goals than planning for PALs. Despite previous literature indicating that changes to land selection priorities result in different protection strategies [@assisbarros2022; @williams2020], there is limited understanding of how key factors impact the selection of PALs. The existing body of SCP research may provide an excellent framework for prioritizing PALs, but to our knowledge, it has had limited implementation [i.e. @halperin2024].
+
+The overarching goal of this study is to develop a framework for systematically identifying priority lands for inclusion in a protected area network that includes both public and private lands. We conducted our study in the Snake River Plain of Idaho, of which 58% is public protected lands, and also contains high quality cropland of global importance [@isda_crops]. The region is also experiencing one of the highest population growth rates of any state in the United States [@census_state] and because the public land base is not eligible for conversion, urban development occurs preferentially on the highest quality agricultural lands [@freedgood2020; @halperin2022]. There is a strong push to protect privately-owned agricultural lands from development, but it is uncertain whether more protected lands are necessary, nor how to prioritize which private lands should be protected. In this study, we measured a diverse suite of NCP in this region across public and private land tenures, and then we used SCP to produce maps of cost-efficient priority lands that optimize NCP protection. We additionally developed a systematic sensitivity analysis workflow that guides the inclusion of input datasets. Our specific research questions were:
+
+1. Is private land protection necessary to protect NCP in a region dominated by public protected areas?
+2. Which NCP indicators are the most important drivers of optimal land protection? 
+
+# Methods
+
+## Study Area
+
+{{< embed notebooks/study-area-map.qmd#fig-studyarea-2 >}}
+
+The Snake River Plain ecoregion of the United States [@ecoregions] intersects with 26 Idaho counties (109,700 km$^2$). It contains  productive croplands [@freedgood2020], localized yet rapidly growing highly developed urban areas [@census_metro], and public rangelands grazed by livestock ([Figure @fig-studyarea-2]a). This region features two primary ecological zones, the river plain and the shrub steppe, and a diverse range of social systems, from urban and exurban systems to dryland agriculture and rural public lands, that together form a diverse array of social-ecological systems [@aho2022]. A majority (58.1%) of lands in the Snake River Plain are federally owned. About one third of the region (33.9%) is privately owned, of which a small percentage (0.4%) are PALs or other easements ([Figure @fig-studyarea-2]b). We excluded tribal lands (2,628 km$^2$, 2.4% of the study area) from this analysis because they have complex land management and protection systems, where the assumption that the cost of land protection scales with fair market value is not applicable [@middleton2011]. The remaining land tenure categories have different levels of protection that affect NCP persistence (Appendix A).
+
+## Data
+
+Data and code used for this analysis are available on GitHub: [link to author's GitHub repository removed for double-blind review].
+
+### Land Use
+
+We used Farms Under Threat 2040 land use data [@hunter2022; @theobald2018], which contain agriculture-specific land classes (e.g. cropland, rangeland). They also differentiate lands within low-density residential areas, which we hypothesized would have different NCP than the same types of land cover outside of residential areas (not shown in @fig-studyarea-2, see @sec-land-use-data).
+
+### NCP Data and Models
+
+We used six NCP categories: carbon [C] stock protection, climate adaptation, food and feed production, habitat quality, water quality, and nature-based recreation probability (@tbl-ncp-data, @suppfiga-workflow) that span a range of heavily co-produced with humans (e.g. food and feed) to heavily nature-produced (e.g. habitat creation).
+
+| NCP Indicator | NCP Category | Description | Citation | Methodology |
+|:---|:---|:------|:----|:----|
+| C Storage                 | C stock protection    | Regional estimates of C storage using the InVEST Carbon Storage model                                                                                                           | @halperin2022; @invest               | @sec-climate-mitigation, [@suppfigb-clim-mit]a     |
+| C Storage                 | C stock protection    | Global, remote sensing-based estimates of C storage in biomass                                                                                                                        | @spawn2020                           | @sec-climate-mitigation, [@suppfigb-clim-mit]b     |
+| Soil Organic C            | C stock protection    | Global interpolation of soil organic C stock measurements                                                                                                                                     | @hengl2018                           | @sec-climate-mitigation, [@suppfigb-clim-mit]c     |
+| Climate Accessibility          | Climate Adaptation    | The degree to which current climate conditions will be locally accessible in the future. Areas with higher climate accessibility will support species' movement to suitable climates       | @suraci2023; @hamann2015             | @sec-climate-adaptation, [@suppfigb-clim-adap]a    |
+| Climate Stability              | Climate Adaptation    | The similarity between present and future climate. Areas with higher climate stability may serve as climate refugia.                                                                       | @suraci2023; @carroll2018            | @sec-climate-adaptation, [@suppfigb-clim-adap]b    |
+| Crop Provision                 | Food and Feed         | Estimates of crop yields (tons, 5-yr period)                                                                                                                                         | @halperin2022                        | @sec-food-supp, [@suppfigb-food]a                          |
+| Livestock Feed Provision       | Food and Feed         | Estimates of feed crops and livestock forage (animal unit months, 5-yr period)                                                                                                       | @halperin2022                        | @sec-food-supp, [@suppfigb-food]b                          |
+| Crop Value                     | Food and Feed         | Prices received for crops over five years                                                                                                                                                  | @iasb                                | @sec-food-supp, [@suppfigb-food]c                          |
+| Agricultural Potential         | Food and Feed         | The Productivity, Versatility, Resiliency (PVR) metric is a measure of land quality based on its ability to support high yields and a variety of crops now and continuing into the future. | @freedgood2020; @theobald2018        | @sec-food-supp, [@suppfigb-food]d                          |
+| Nitrogen Retention Capacity            | Water Quality         | Estimated percentage of nitrogen inputs that each watershed retains using the InVEST Nutrient Delivery Ratio model                                                                                                                                 | @chaplin2019; @halperin2022; @invest | @sec-waterqual-supp, [@suppfigb-waterqual]a           |
+| Estimated Nitrates             | Water Quality         | Nutrient contamination "rank" from modeled nitrate levels, where the cleanest lands have the highest rank.                                                                            | @ransom2021                                | @sec-waterqual-supp, [@suppfigb-waterqual]b           |
+| Landscape Condition            | Habitat               | Large intact natural areas or corridor zones between them                                                                                                                                  | @IDcruhab                            | @sec-habitat-supp, [@suppfigb-hab]a                     |
+| Ecological Connectivity        | Habitat               | The ability of a landscape to support organism movement and link habitats                                                                                                                  | @suraci2023                          | @sec-habitat-supp, [@suppfigb-hab]b                     |
+| Habitat Quality                | Habitat               | Spatial variation of habitat quality, which is lowered by the presence of and proximity to habitat threats, using the InVEST Habitat Quality model                                                                                  | @halperin2022; @invest               | @sec-habitat-supp, [@suppfigb-hab]c                     |
+| Ecological Integrity           | Habitat               | The degree to which a location remains in its natural state without human influence                                                                                                        | @suraci2023                          | @sec-habitat-supp, [@suppfigb-hab]d                     |
+| Terrestrial Species of Concern | Habitat               | Presence of federally listed species and overall species richness                                                                                                                          | @IDcruhab                            | @sec-habitat-supp, [@suppfigb-hab]e                     |
+| Biodiversity Value             | Habitat               | Sites that support biotic assembleges characteristic of the geophysical setting                                                                                                            | @anderson2023                        | @sec-habitat-supp, [@suppfigb-hab]f                     |
+| Terrestrial Resilience         | Habitat               | Sites with high diversity of topoclimates accessible to species                                                                                                                            | @anderson2023                        | @sec-habitat-supp, [@suppfigb-hab]g                     |
+| Wetland / Riparian               | Habitat               | Important wetland/riparian habitats                                                                                                                                                        | @IDcruhab                            | @sec-habitat-supp, [@suppfigb-hab]h                     |
+| Recreation Probability         | Recreation            | Global-scale recreation probability model ensemble                                                                                                                                         | @hooftman2023                        | @sec-recreation-supp, [@suppfigb-rec]a               |
+| Recreation Probability         | Recreation            | Regional-scale recreation model for the probability of nature-based recreation opportunities                                                                                               | @halperin2022                        | @sec-recreation-supp, [@suppfigb-rec]b, @supptblb-rec |
+
+: NCP models and data used as inputs for the systematic sensitivity analysis workflow. The methods column lists the sections in the Appendix B with more information about data sources and processing for each NCP dataset. {#tbl-ncp-data}
+
+### Land Cost
+
+We used a spatial dataset of estimated land values (million USD/km2; @suppfigb-landcost) calculated across the contiguous United States, which represents the cost of purchasing lands outright  [@nolte2020; @halperin2024]. We assume easement costs will scale with land value so that more expensive parcels will be more expensive easements.
+
+We upscaled each continuous spatial dataset to 1km resolution, chosen as representative of the average size of an agricultural easement based on the mean easement size in the Protected Agricultural Lands Database (0.7 km$^2$, @supptbla-easement-size). All analyses were performed using R Statistical Software [v4.3.3, @Rteam].
+
+## Analytical Approach
+
+### Question 1: Is private land protection necessary to protect NCP in regions dominated by public protected areas?
+
+We calculated the percent of each NCP indicator provided by each land tenure category. We compared the percent NCP provided to the percent of the land tenure category within the study area to quantify which land tenure categories are contributing more or less NCP than expected. For example, if a land tenure category covers 30% of the study area and contributes 30% of total recreation NCP, it is providing its expected share of NCP.
+
+### Question 2: Which NCP indicators are the most important drivers of optimal land protection?
+
+We generated multiple series of systematic conservation planning [SCP] scenarios that use a set of NCP indicators to generate a solution containing priority protection areas. We used the `prioritizr` R package with a Gurobi solver in R [v8.0.3, @hanson2024; v12.0-0, @gurobi]. SCP in `prioritizr` requires, at minimum: (1) an objective function, (2) conservation features to protect, (3) cost of protection, and (4) protection targets (>0% and <100% of each conservation feature). 
+
+We used the minimum set objective function for this analysis, which generates priority areas that acheive conservation targets for each feature at the lowest possible cost. To test sensitivity to features across targets, we used a range of protection targets from 5-75% of each NCP indicator. We also chose 30% as a specific target to examine following global conservation initiatives [@cop15]. 
+
+For conservation features, we used the NCP indicators described above. Few were highly correlated (@suppfigc-corrs), yet reaching protection targets for one indicator can result in protecting others implicitly. Since the use of many features is computationally expensive, we implemented a novel sensitivity analysis to reduce the number of NCP indicators in our SCP scenarios (see @sec-sens-analysis and the workflow diagram @suppfiga-workflow).
+
+### Selecting features: systematic sensitivity analysis workflow {#sec-sens-analysis}
+
+To reduce NCP indicators in the all-NCP scenario, we ran a series of SCP scenarios in each NCP category. We set NCP protection targets to range from 5-75%, created SCP scenarios for each possible combination of indicators, and calculated a priority areas for each scenario at each target. We also created a full solution for each category that contained all its NCP indicators. We then quantified the spatial dissimilarity between each solution and the full solution for that NCP category and target using Earth Mover's Distance [EMD]. EMD is a spatial similarity measure that supposes each pixel value in raster A is a pile of earth and each pixel value in raster B is a hole. It calculates the effort (distance times amount of earth) need to fill all the "holes" in raster B with the earth in raster A [@roura2010]. A lower EMD indicates that a pair of rasters have a more similar spatial distribution. To assess dissimilarity across targets, we plotted the EMD of each solution at each target and calculated the area under the curve [AUC] (Appendix C). Solutions with the lowest AUC are more similar to the full solution across all targets. For all EMD calculations, we aggregated solutions to 5km as the algorithm could not handle larger matrices, and normalized all solutions so they summed to one. All EMD calculations were performed with the `emdist` R package [v0.3-3, @emdist]. 
+
+When selecting NCP indicators in each NCP category, we determined that redundant indicators were present if there were solutions with AUC <1000, a threshold based on visual examination of AUC plots (Figures C[-@suppfigc-clim-emd-mit] -- C[-@suppfigc-rec-emd] and @supptblc-habitat-auc). If there were solutions with <1000 AUC, we selected the solution with the lowest AUC and fewest number of included indicators. The NCP indicators not used in the selected scenario were classified as redundant.
+
+### Influential NCP
+
+To identify the most influential NCP in our solution, we performed a similar sensitivity analysis to the workflow described in @sec-sens-analysis. We compared scenarios that left out one NCP indicator or one entire NCP category to the solution with all indicators and categories (the all-NCP solution). A higher AUC value indicates the missing NCP indicator or NCP category is more influential.
+
+# Results
+
+## Is private land protection necessary to protect NCP in regions dominated by public protected areas?
+
+Over 55% of most NCP in the study area were provided by federal lands, with the exception of food and feed NCP, of which only 12.2% were provided by federal lands (@fig-ncp-proc, see @suppfigd-ncp-contribution-21 for all 21 NCP datasets). Over 80% of food and feed NCP were contributed by private lands, but private lands contributed less of all other NCP than expected, with the exception of wetland/riparian habitat. State lands, PALs, and other easements contributed NCP fairly equivalent to their land cover extent.
+
+{{< embed notebooks/ncp-in-management-categories.qmd#fig-ncp-proc >}}
+
+## Selecting features: systematic sensitivity analysis workflow
+
+For the climate adaptation and recreation NCP categories, removal of any single indicator resulted in a solution very different from the full solution. For these NCP categories, we retained all indicators. For the other NCP categories, removal of one or more indicators resulted in solutions very similar to the full solution (@fig-redundants). This subset of indicators (listed in @fig-redundants) were classified as redundant and removed from the all-NCP scenario. Without the redundant indicators, the all-NCP scenario included two C stock protection indicators (soil organic C and InVEST C storage), two climate adaptation indicators (climate accessibility and climate stability), three food and feed indicators (crop provision, livestock feed provision, and agricultural potential), one water quality indicator (N retention capacity), four habitat indicators (wetland/riparian, ecological connectivity, terrestrial resilience, and habitat quality), and two recreation indicators (both recreation probability models).
+
+{{< embed notebooks/selecting-features.qmd#fig-redundants >}}
+
+## Which NCP indicators are the most important drivers of optimal land protection?
+
+The all-NCP solution was most sensitive to two NCP categories: (a) food and feed, especially agricultural potential, and (b) C stock protection (@fig-loo-emd). The all-NCP solution was highly sensitive to inputs when NCP protection targets were lower and less sensitive at higher NCP protection targets, but this relationship was nonlinear. The target chosen affected the sensitivity of the solution to different indicators. For example, the solution was more sensitive to the climate adaptation indicators than the food and feed indicators at targets 5-10%, but was more sensitive to the food and feed indicators than the climate adaptation indicators at targets 15-75% (@fig-loo-emd).
+
+{{< embed notebooks/allNCP-sens-analysis.qmd#fig-loo-emd >}}
+
+{{< embed notebooks/allNCP-sens-analysis.qmd#fig-diff-maps >}}
+
+Since the all-NCP solution was most sensitive to food and C stock protection NCP, we compared the outcomes of these dissimilar solutions when these NCP were left out [@fig-diff-maps, @supptbld-sol-diffs]. The all-NCP solution ([@fig-diff-maps]a) was 33,677 km$^2$, while the Leave Out (LO) Food solution ([@fig-diff-maps]b) was 34,244 km$^2$ and the LO-C stock protection solution ([@fig-diff-maps]c) was 33,517 km$^2$. 
+
+The all-NCP and LO-C stock solutions were composed of ca. 9% cropland, with similar crop types present, while the LO-food solution was only 0.7% cropland, which was mainly alfalfa-growing ([@fig-diff-maps]d, @supptbld-sol-diffs). The all-NCP solution had slightly lower inclusion of rangelands and slightly higher inclusion of forestlands than the LO-C stock solution ([@fig-diff-maps]d, @supptbld-sol-diffs).
+
+The all-NCP and LO-C stock solutions were composed of less federal lands (59.1% and 58.8%, respectively) than the no-food solution (74.7%, [@fig-diff-maps]f, @supptbld-sol-diffs). Unprotected private lands were included in all solutions, but were especially present in solutions that protect food NCP.
+
+The total fair market value of lands in the LO-food solution (\$7.48B) was 22% less than the all-NCP solution (\$9.64B), while the total value of lands in the LO-C stock solution (\$9.43B) was only 2% less than the all-NCP solution. Food is included as a target NCP in establishing PALs, so these extra costs are accepted implicitly, but the addition of climate goals would result in relatively little extra investment from institutions.
+
+# Discussion
+
+## Is private land protection necessary to protect NCP in a region dominated by public protected areas?
+
+Federal lands provided a wide variety of NCP, often exceeding their expected provision. In the public-lands dominated landscape of Idaho's Snake River Plain, they play an important role in providing NCP overall. However, private lands provided the most food and feed NCP, which is consistent with other studies showing that private land protections are critical to protect the full suite of NCP that humans value [@chapman2023; @ivanova2020]. In Idaho specifically, the food NCP provided predominantly by private lands and the recreation NCP provided by public lands are important elements of rural economies and identities [@winkler2007]. Networks that include both public and private lands have the highest chance of providing the widest range of NCP.
+
+This research adds to the debate on where protected areas should be established and what should occur in those areas [@dinerstein2020; @holmes2017]. The International Union for Conservation of Nature (IUCN) defines protected areas as spaces that are managed "to achieve the long-term conservation of nature with associated ecosystem services and cultural values” [@unep2019]. The IUCN definition encompasses a range of land uses from strict human-exclusion reserves to areas with limited extractive use, yet does not explicitly include areas of cultural importance [@dudley2010]. This definition seemingly excludes PALs, yet PALs can provide a suite of NCP and support rural social services and culture. Though food production NCP and other NCP may not always co-occur in the same space [@halperin2022], PALs can protect multifunctional agricultural landscapes that do provide a suite of NCP. For example, easements for ranches in the Lassen Foothills of California not only limited development and protected ranching activity, but also protected blue oak woodlands habitat that is predominantly found on private land [@byrd2009; @morrisette2001]. PALs are increasingly used in areas facing development pressure, and it will be worthwhile to consider their role in protecting a suite of NCP.
+
+## Which NCP indicators are the most important drivers of optimal land protection?
+
+We found that food production was the most important driver of optimal land protection solutions. We expected this result because less costly federal lands tend to have many co-occurring NCP yet low agricultural quality [@halperin2022]. Our SCP algorithm was driven to find the least costly lands that provide high value food and feed NCP after selecting the lowest cost lands that provided much of the other NCP. This result affirms PAL programs that prioritize protection based on land cost and food and feed NCP [@freedgood2020; @miller2015; @hellerstein2002]. 
+
+Surprisingly, we also found that second to food and feed NCP, C stock protection was the most important driver of solutions. Furthermore, excluding climate-related NCPs created solutions that didn't efficiently protect lands that provide high carbon storage and climate adaptation values. Critically, we found the additional cost to include climate NCPs is minimal. This is an important result because, unlike food and feed, climate-related NCP are rarely considered in PAL planning. Climate change will cause disruption to many NCP [@chaplin2019; @requena2023]. Therefore, the most effective land protection will consider both current and future NCP. While there may be high-level consideration that climate change should be considered in agricultural land protection planning [@freedgood2020], in our experience, the explicit inclusion of climate change indicators in PAL planning is very limited.
+
+## Sensitivity analysis workflow
+
+In our study, the sensitivity analysis was critical to identify both redundant and influential NCP indicators in our SCP analysis. Removing redundant inputs created a simpler all-NCP scenario and reduced the computational resources needed to solve it. The sensitivity analysis then revealed the most influential drivers of SCP solutions, which allowed us to quantify the impact of each influential driver on solutions. 
+
+The vast majority of SCP research does not conduct a sensitivity analysis [@velazco2020; @neuendorf2018assessing]. This is problematic because SCP results may be assumed to be fact even if their predicted protection outcomes are impossible, and implementing these uninformed decisions can lead to inefficient investments and environmental and human harm [@neuendorf2018assessing]. Sensitivity analyses overcome these problems by communicating model behavior and increasing transparency in conservation planning [@neuendorf2018assessing]. SCP assumes the input layers (here, the NCP data) are accurate; however, input layers have different levels of uncertainty. Our sensitivity analysis can be used as a first assessment of solution uncertainty. If the most influential layers are highly uncertain, the solution will also have high uncertainty. In these cases, additional methods that deal with uncertainty in SCP, such as Monte Carlo analysis, are necessary [@neuendorf2018assessing].
+
+## Limitations and future directions
+
+Spatial analyses of this scale require various assumptions. For example, we assume that land in a given land use category (e.g. all croplands) are managed the same, and thus provide the same level of NCP. While conventional land use practices dominate in our study area, there are small pockets of non-conventional land uses, such as regenerative agriculture and sustainable landscaping. It was beyond the scope of this study to systematically map alternative land management strategies. We suggest future research explore systematic approaches to incorporating the effects of different management strategies on NCP and determining their effect on SCP solutions. Relatedly, our SCP solutions can point practitioners to general priority areas for protection, but land trusts and other land protection agencies should still use local knowledge and additional criteria in combination with land-owner willingness to create PALs that provide high and/or diverse NCP. 
+
+The NCP framework has been criticized for inappropriate valuation measures, inadequate consideration for demand and access, and issues of justice and equity [@chan2020]. We used this framework because we contend that a greater understanding of NCP trade-offs associated with land use change can help inform choices about land conversion or protection [@neugarten2024]. However, use of the NCP framework also led us to exclude tribal lands for two reasons: (1) we were not able to integrate the context-specific NCP perspective, typical of local and indigenous knowledge systems [@diaz2018]; and (2) tribal lands have a complex land tenure history that complicates land protection, especially by easements, a common form of PAL [@middleton2011]. Our study area is located within the historic lands of the Shoshone, Bannock, Newe Sogobia (Eastern Shoshone), Nimiipuu (Nez Perce), Cayuse, Umatilla, and Walla Walla peoples [@nativelanddigital]. We suggest that SCP could be advanced by incorporating context-specific NCP and non-NCP frameworks, particularly from Indigenous and local perspectives, as these people play important roles in protecting land and its contributions to humans.
+
+# Conclusion
+
+We used an NCP framework to systematically identify priority lands for protection in an area with both public and private lands. We found that private land protection is important even in a public lands-dominated landscape. In regions where food production provides economic, environmental and cultural benefits, private land protection through PALs is vital. Agricultural land protection is growing, and systematic conservation planning for multiple NCP is an underutilized yet valuable method for PAL planning. We found that food and C stock protection were the most influential drivers of SCP results, but climate NCP are not usually included in PAL planning. Integrating climate NCP into PAL planning will result in more resilient protected area networks than may otherwise be created, especially because the additional cost to include climate NCP is minimal. This work highlights the importance of climate considerations in protected area planning at local and regional scales. The sensitivity analysis workflow that we developed for SCP analysis can be replicated in other regions to improve PAL planning by identifying underprotected NCP and targeting important NCP.
+
+\newpage
+
+# References {.unnumbered}
+
+::: {#refs-main}
+:::
+
+\newpage
+
+# Appendix A: Research Context
+
+## Research Overview
+
+We used 21 NCP indicators in six NCP categories to estimate NCP across Idaho's Snake River Plain. To answer question 1, we used these 21 data layers along with polygons of land tenure to quantify the amount of NCP in each land tenure category. To answer question 2, we employed a two-part sensitivity analysis (@suppfiga-workflow).
+
+
+The first sensitivity analysis was performed six times, once for each NCP category. In each NCP category, we created a scenario with all NCP indicators and scenarios with each possible combination of NCP indicators. For each scenario, we generated optimal protection solutions that targeted 5-75% of each included NCP. We then compared each solution with the full solution in that NCP category, quantifying their dissimilarity at each target, and calculated the area under the curve [AUC]. We selected NCP indicators from the scenario with a low AUC and fewer NCP indicators to be part of scenario that included all NCP categories.
+
+The second sensitivity analysis was performed once. We created a scenario with the 14 NCP indicators selected in the first sensitivity analysis, and scenarios in which one NCP indicator or one NCP category was removed. Again, for each scenario, we generated optimal protection solutions that targeted 5-75% of each included NCP. We then compared each solution with the all-NCP solution, quantifying their dissimilarity at each target, and calculated the AUC. The most dissimilar solutions, those with the highest AUC, revealed which NCP were most influential to the all-NCP solution.
+
+::: {#suppfiga-workflow width=90%}
+
+![Workflow diagram for quantifying NCP in each land tenure category, selecting features for the systematic conservation planning using a novel sensitivity analysis, and evaluating the most influential NCP indicators in Idaho's Snake River Plain.](figures/workflow.png)
+
+Workflow diagram for quantifying NCP in each land tenure category, selecting features for the systematic conservation planning using a novel sensitivity analysis, and evaluating the most influential NCP indicators in Idaho's Snake River Plain.
+
+:::
+
+## Land Tenure Categories
+
+Land tenure can be broadly defined as the relationship between humans and land, with social, political, legal, and economic structures all influencing this relationship [@fao2002], and it dictates land use options, management actions, and protection mechanisms. Here, we focus on two categories of land tenure: public lands, where land is owned and managed by a governmental entity; and private lands, where land is owned and managed by an individual, a corporation, or any non-governmental organization, or owned by any of these parties and managed by non-owners. Since land tenure dictates existing land protections and management actions (@supptbla-sma), it is critical to understand which NCP are present or absent from different types of land tenure.
+\newpage
+
+::: {#supptbla-sma}
+
+| Type of Land | Description | Level of Protection | Spatial Data Source |
+|:----|:--------|:----------|:----|
+| Federal  public lands                       | Federal lands are generally protected from residential development, but not always from resource harvesting (such as timber harvest and mining).  | All federal lands are closed to intensive agriculture and residential development. Historically, federal lands have rarely been transferred to other tenure categories, but there is political pressure to make this exchange more frequent [@streater2024].                                                                                         | @blmSMA     |
+| State public lands                         | State lands are closed to residential development, but are mandated to produce income over time for the state.                                                                                                                     | Sales of state land in Idaho to private entities are much more common than sales of federal land, so they are not as protected long-term as federal lands [@barker2016]. | @blmSMA     |
+| Private Protected Agricultural Lands (PALs) | Easements created to protect agricultural land.                                                                                                                                                                                    | Land use is agreed upon between landowner and easement holder on an easement-to-easement basis, but in general PALs must continue to be used for agriculture.                | @pald       |
+| Other protected private lands       | Easements created for purposes other than agricultural land protection.                                                                                                                                                            | Land use is agreed upon between landowner and easement holder on an easement-to-easement basis.                                                                              | @nced       |
+| Other private lands                 | Privately owned lands that have no known easements or other protections. They may be owned and managed by by an individual, a corporation, or any non-governmental organization, or owned by any of these parties and managed by non-owners.                                                                                                                                                           | These lands have the lowest legal restrictions on land use and subsequent NCP change.                                                                                        | @blmSMA     |
+
+Land tenure categories used in our analysis of the Snake River Plain, Idaho.
+:::
+
+\newpage
+
+## Average size of agricultural easements
+
+::: {#supptbla-easement-size}
+| Database                                        | Mean easement size (sq km) | Median easement size (sq km) |
+|-------------------------------------------------|----------------------------|------------------------------|
+| Protected Agricultural Lands Database (PALD)    | 0.7                        | 0.2                          |
+| PALD (study area)                               | 4.3                        | 2.2                          |
+| National Conservation Easements Database (NCED) | 2.7                        | 0.1                          |
+| NCED (study area)                               | 0.2                        | 0.01                         |
+
+The average size of easements differs based on the purpose and the focus area. The Protected Agricultural Lands Database (PALD) documents only agricultural easements, while the National Conservation Easements Database (NCED) documents all known easements. Different measures of average easement size from these databases are varied, but overall they average to about 1 km$^2$, the chosen spatial scale for this analysis.
+
+:::
+
+\newpage
+
+## References {.unnumbered}
+
+::: {#refs-appendixA}
+:::
+
+\newpage
+
+# Appendix B: Data Used
+
+## Land Use Data {#sec-land-use-data}
+
+Land use data were required for the InVEST carbon storage, nutrient delivery ratio, and habitat quality models, and were also used in the crop provision, livestock feed provision, crop value, and recreation models. We used the American Farmland Trust's Farms Under Threat 2040 land use data in this analysis [available by request at https://csp-fut.appspot.com/, @hunter2022; @theobald2018]. One feature of these data is the low-density residential [LDR] category, which identifies land uses that are present in locations dominated by residential land use with low densities of houses [@theobald2018]. We retained these categories in our models, as we hypothesized that NCP in these areas would vary from locations with less residential land use. However, in @fig-studyarea-2, we collapsed land use categories in LDR areas into their primary identified land use (e.g. Cropland in LDR became Cropland) for ease of visualization. LDR is most common on the edges of cities, of which there are few in our study area, and the LDR category was barely visible. These data, including LDR, can be visualized and explored at https://development2040.farmland.org/, where they are titled "Baseline Scenario."
+
+\newpage
+::: {#supptblb-land-use}
+
+{{< embed notebooks/study-area-map.qmd#tbl-land-use >}}
+
+Categories of land use used in NCP models requiring land use data and their extent in Idaho's Snake River Plain
+
+:::
+
+For the InVEST carbon storage (@sec-climate-mitigation) and nutrient delivery ratio (@sec-waterqual-supp) models, we separated the federal lands land use classes ([Figure @fig-studyarea-2]a) into rangeland and forestland using their underlying 2016 NLCD land cover classes [@nlcd]. We expected NCP in these categories to be more closely aligned with the land use type than the federal land tenure class that spans multiple land uses.
+
+
+In most models, we kept the land use data in its native resolution of 30m, only aggregating the final model results to a resolution of 1km. The single exception was the InVEST Nutrient Delivery Ratio, which could not handle the fine scale resolution of 30m with such a large extent. For this model, we used a resolution of 100m, resampled by mode. We also needed to resample the land use data to 1km to compare the average base and final recreation scores of the recreation probability model. Resampling to 1km by mode led to some land uses being smoothed over because they had low and isolated representation (@supptblb-rec).
+
+## NCP Data
+
+### Climate Regulation {#sec-climate-supp}
+
+#### C stock protection {#sec-climate-mitigation}
+
+We used three NCP indicators that describe different facets of C stock protection. First, following the methods of @halperin2022, we used the InVEST Carbon Storage model [v3.12.0, @invest] to model C storage. This model estimates C storage by using four metrics -- above-ground biomass, below-ground biomass, soil C, and dead C (e.g. leaf litter) -- that are specified for each land class (@supptblb-carbon-params, [@suppfigb-clim-mit]a).
+
+Since the simple carbon model from @invest cannot capture the nuanced C storage legacies introduced by different land tenure and use (without detailed on-ground measurement), we included other models of C storage based on remote sensing and global compilations of soil measurements ([@suppfigb-clim-mit]b, @spawn2020; [@suppfigb-clim-mit]c, @hengl2018). 
+
+For the @spawn2020 global maps of biomass C density in Mg C/ha, we used the sum of above- and below-ground biomass estimates.
+
+For the @hengl2018 global maps of soil organic C stock at soil depths from 0-200cm, we added SOC stock from soil depths 0-10c, 10-30cm, 30-60cm, 60-100cm, and 100-200cm together for the total SOC stock at depths 0-200cm. We used a depth to bedrock data layer from @shangguan2016 to exclude soil layers where bedrock is present from a pixel's sum, resulting in more conservative SOC stock estimates.
+
+\newpage
+::: {#supptblb-carbon-params}
+
+```{r}
+#| label: supptblb-carbon-params
+#| message: false
+
+params <- read.csv("data/climate_mitigation/InVEST/inputs/01_Weighted_Cpools_AFT.csv")
+
+knitr::kable(params[-nrow(params),-1], digits = 2,
+             col.names = c("Land Class", "Aboveground Biomass", "Belowground Biomass", "Soil Organic C", "Dead C"))
+```
+
+C storage parameters used for each land class in the InVEST Carbon Storage model. These are weighted averages of C parameters used by @halperin2022 adapted to the land cover data used in this analysis. All carbon units are in Mg C/ha.
+
+:::
+
+::: {#suppfigb-clim-mit}
+
+{{< embed notebooks/clim-ncp-models.qmd#fig-clim-mit >}}
+
+The C stock protection indicators in the sensitivity analysis included (a) regional estimates of C storage using the InVEST Carbon Storage model [@halperin2022; @invest], (b) global, remote sensing-based estimates of C storage in biomass [@spawn2020], and (c) global estimates of soil organic C stock in soils at depths 0-200cm. Outlier values are shown in red for ease of visualization (top 0.3% of values).
+
+:::
+
+#### Climate Adaptation {#sec-climate-adaptation}
+
+C storage is not the only climate-related contribution a landscape can provide. In addition to C storage, @suraci2023 used two indicators of expected local and regional climate change to create NCP indicators. Climate accessibility is the degree to which current climate conditions will be locally accessible in the future. Areas with higher climate accessibility will support species' movement to suitable climates ([@suppfigb-clim-adap]a, @suraci2023; @hamann2015). Climate stability is the similarity between present and future climate. Areas with higher climate stability may serve as climate refugia ([@suppfigb-clim-adap]b, @suraci2023; @carroll2018).
+
+The @suraci2023 western North America maps of the degree to which current climate conditions will be locally accessible in the future are the inverse of the @hamann2015 climate velocity maps, which measure how quickly species must migrate to maintain constant climate conditions. We multiplied 1km resolution climate velocity maps from @hamann2015 by -1 according to @suraci2023, then subtracted the minimum value from all cells so that the cell values were positive and the minimum climate accessibility score was equal to 0, since all optimization inputs must be positive.
+
+The @suraci2023 North America climate stability maps of the similarity between present and future climate at a given location are the inverse of the @carroll2018 climatic dissimilarity maps. We multiplied 1km resolution climate dissimilarity maps from @carroll2018 by -1 according to @suraci2023, then subtracted the minimum value from all cells so that the cell values were positive and the minimum climate stability score was equal to 0.
+
+::: {#suppfigb-clim-adap}
+
+{{< embed notebooks/clim-ncp-models.qmd#fig-clim-adap >}}
+
+The climate adaptation indicators in the sensitivity analysis included (a) climate accessibility -- the degree to which current climate conditions will be locally accessible in the future [@suraci2023; @hamann2015] and (b) climate stability -- the similarity between present and future climate in a particular location [@suraci2023; @carroll2018].
+
+:::
+
+### Food and Feed {#sec-food-supp}
+
+We used four NCP indicators that describe different facets of food and feed production. To create estimates of crop and livestock feed production, we first used the United States Department of Agriculture National Agricultural Statistics Service (USDA NASS) Cropland Data Layers from 2016-2020 [5 years of data, @nass] to determine where different crops were grown and the Idaho Annual Statistical Bulletin [@iasb] to determine the approximate yield of those crops. We converted crop yields (e.g. potatoes, sugarbeets, onions) to tons per 1km pixel for each year. To estimate livestock feed, we converted corn, alfalfa, and other hay to animal unit months (AUM) per 1km pixel and modeled these as livestock feed (primarily for cattle). Corn was included as livestock feed since corn in Idaho is primarily grown for cattle feed [@halperin2022]. Since the Idaho Annual Statistical Bulletin does not report yields for pasture and shrubland, which are included in the NASS Cropland Data Layers and can be used for livestock forage, we estimated AUM per 1km pixel from the Rangeland Analysis Platform Production Explorer [@rap]. We clipped both the crop and livestock feed provision maps to exclude forestland, highly developed areas, and federal lands without livestock grazing to exclude land that is not typically used for crop or livestock feed provision [@hunter2022]. In summary, the livestock feed provision maps include yields in AUM for corn, alfalfa, other hay, shrublands, and pasture, and the crop provision maps include yields in tons for all other crops reported in the Idaho Annual Statistical Bulletin [@iasb]. Available yield estimates from the Idaho Annual Statistical Bulletin and the Rangeland Analysis Platform covered approximately 89% of cropland, pastureland, and rangeland across the Snake River Plain. We summed the estimates for 2016-20 to create final NCP estimates of five-year crop ([@suppfigb-food]a) and livestock feed provision ([@suppfigb-food]b). Five year estimates are preferable to single year estimates because they reflect the full production potential of croplands with 2-5 year crop rotations [@spangler2022].
+
+Estimates of total crop production are a measure of this landscape's contributions to food security, but food also has important economic value in the region. We converted 5-yr crop totals to prices received for those crops from the Idaho Annual Statistical Bulletin [@iasb] to model crop economic value ([@suppfigb-food]c).
+
+Another measure of potential contributions to food production is a quantification of overall agricultural land quality. One such measure is the Productivity, Versatility, Resiliency (PVR) metric, a measure of land quality based on its ability to support high yields and a variety of crops now and continuing into the future (@freedgood2020; [@suppfigb-food]d). One limitation of this data layer for this analysis is that it does not attempt to assess the agricultural quality of federal lands [@theobald2018].
+
+::: {#suppfigb-food}
+
+{{< embed notebooks/food-and-feed-ncp-models.qmd#fig-food >}}
+
+The food and feed indicators in the sensitivity analysis included (a) estimates of crop yields [tons, 5-yr period, @halperin2022], (b) estimates of feed crops and livestock forage [animal unit months, 5-yr period, @halperin2022], (c) prices received for crops [5 yrs, @iasb], and (d) the Productivity-Versatility-Resilience metric, a measure of land quality based on its ability to support high yields and a variety of crops now and continuing into the future [@freedgood2020; @theobald2018]
+
+:::
+
+### Water Quality {#sec-waterqual-supp}
+
+We used two NCP indicators that describe different facets of water quality, focusing on nutrient retention and nutrient contamination. We used the InVEST Nutrient Delivery Ratio model [@invest] to model nitrogen (N) retained across the Snake River Plain landscape every year. This model uses elevation [@hydrosheds] and watershed boundary inputs [@huc12] to model streamflow dynamics of a landscape. A biophysical table [@halperin2022] indicates nutrient input into each pixel of land based on land cover classification. InVEST then uses a nutrient runoff proxy [@worldclim] to model the amount of a nutrient that flows from each pixel of land into the modeled streams. The InVEST model is conditioned by two parameters: threshold flow accumulation, which is the number of upslope pixels that must flow into a downslope pixel before it is considered a stream, and the Borselli K parameter. By using river maps of the Snake River Plain [@hydrosheds_rivers] as a reference, we set the threshold flow accumulation to 400 pixels and the K parameter to the default value of 2.
+
+N retention, which measures the ability of the land to retain nutrient inputs, is calculated by subtracting N exports from N load (N inputs to watershed, estimated based on land use, and N imports from upstream watersheds), both estimated in the InVEST model described above, at the HUC12 watershed scale [@huc12]. N retention is highly influenced by human managment, especially fertilizer application, which can greatly increase the N load in a watershed. To estimate nature's contributions apart from human activity, we calculated N retention capacity by dividing N retention by total N load for each watershed, estimating the percentage of nutrient inputs that each watershed retained (@chaplin2019, [@suppfigb-waterqual]a). High values (0.7-0.9, indicating 70-90% N retained from a watershed's N load) are more likely in low-lying areas with gradual slopes and vegetation presence, both of which limit water and nutrient runoff. This methodology allows for relative comparison of watershed nutrient dynamics, which is the intent of this nutrient delivery ratio model [@invest].  We ran this model at a resolution of 100m, and rasterized the watershed-level N retention ability results to a resolution of 1km.
+
+N retention capacity measures the ability of the land to retain nutrient inputs, but it does not describe the state of nutrient contamination. @ransom2021 estimate nitrates at domestic well supply depths for the contiguous United States. Since the systematic conservation planning algorithm maximizes NCP, we multiplied the estimates by -1 and added the maximum nitrate estimate so that the cleanest pixels had the highest nitrate "rank" ([@suppfigb-waterqual]b).
+
+::: {#suppfigb-waterqual}
+
+{{< embed notebooks/water-quality-ncp-models.qmd#fig-waterqual >}}
+
+The water quality indicators in the sensitivity analysis included (a) the estimated percentage of nitrogen inputs that each watershed retains [@chaplin2019; @halperin2022; @invest] and (b) nitrate contamination "rank" from modeled nitrate levels, where the cleanest lands have the highest rank [@ransom2021].
+
+:::
+
+### Habitat {#sec-habitat-supp}
+
+We used eight NCP indicators that describe different facets of habitat quality. 
+
+Three state-scale data layers are discrete priority ranks from Idaho's contribution to the Western Governors' Association Crucial Habitat Assessment Tool [@IDcruhab]. These layers were downscaled from 3 mi$^2$ hexagons to 1km pixels by selecting the maximum rank present in each 1km grid cell. Landscape suitability (large intact natural areas or corridor zones between them, [@suppfigb-hab]a) ranges from 1 (highest priority) to 3 (lowest priority). Lands that were neither intact nor a corridor have a value of NA. We transformed the ranks to 5 (high priority), 3 (medium priority), and 1 (low priority) for the optimization algorithm. Terrestrial species of concern (presence of federally listed species and overall species richness, [@suppfigb-hab]e) is an aggregate layer that ranks lands based on presence or known habitat for 133 species of greatest conservation need. The ranks range from 1 (high priority; known observations of federally listed species) to 6 (low priority; 1-20 species present based on model). We transformed these ranks to range from 5 (highest priority) to 0 (lowest priority) for the optimization algorithm. Wetland/riparian ([@suppfigb-hab]h) is an aggregate layer of important wetland and riparian habitats. The ranks range from 1 (highest priority) to 5 (lowest priority), with non-wetland areas given an NA value. We transformed these ranks to range from 4 (highest priority) to 0 (lowest priority) for the optimization algorithm. 
+
+Two national-scale data layers from @suraci2023 are ecological connectivity ([@suppfigb-hab]b) and ecological integrity ([@suppfigb-hab]d). Ecological connectivity [@suraci2023] is a measure of the ability of a landscape to support the natural movement of organisms and to link high quality habitats. We re-projected this layer to 1km pixels using bilinear interpolation. It is a unitless index that ranges from 179 to 31,128. Ecological integrity [@suraci2023] is the degree to which a given location remains in its natural state without human influences (less modified by human activity). This is a unitless index ranging from 0 to 1, and we re-projected to 1km pixels using bilinear interpolation.
+
+Two national-scale data layers from @anderson2023 are terrestrial resilience ([@suppfigb-hab]g), and recognized biodiversity value ([@suppfigb-hab]f). Terrestrial Resilience describes sites with high diversity of connected topoclimates linked by natural cover and accessible to species. We reprojected this layer from 30m pixels to 1km pixels using bilinear interpolation. Since it was represented as a z-score (where 0 is the average), we added an equal value to every pixel so that the lowest value was 0, resulting in a unitless z-score range from 0 to 6,094. Recognized biodiversity value describes sites supporting biotic assemblages characteristic of their geophysical setting. We re-projected this layer from 30m pixels to 1km pixels by selecting the maximum rank in each 1km pixel. The data ranges from 0 (low value) to 4 (high value), with most sites in the Snake River Plain ranked 0, 1, or 4.
+
+We used the InVEST habitat quality model [@invest] to model spatial variation of habitat quality ([@suppfigb-hab]c), which is lowered by the presence of and proximity to habitat threats, defined here as the presence of highly developed, crop-, and pastureland, and major and minor roads and trails. The effect of each threat is modified by each land type's sensitivity to it. The threats are weighted to indicate different levels of disruption to terrestrial species and the range of that disruption. For example, highly developed land was modeled as a 100% disruption to terrestrial species with a range of 5 km from its edge, while crop- and pasutureland was modeled as an 80% disruption with a range of 4 km from its edge.  The threat weight and effective distance of agriculture and roads was taken from @polasky2011, while different levels of developed land threats were taken from @blumstein2015. Sensitivity parameters were adapted from @halperin2022 with the same weighted average method used in the other InVEST models in this analysis. This is a unitless rank ranging from 0 to 1, with over 75% of the Snake River Plain ranked above 0.75. These regional-scale model estimates are highly correlated with the @suraci2023 national-scale Ecological Integrity layer  (Pearson correlation of 0.89).
+
+::: {#suppfigb-hab}
+
+{{< embed notebooks/habitat-ncp-models.qmd#fig-hab >}}
+
+The habitat indicators in the sensitivity analysis included (a) large intact natural areas or corridor zones between them [@IDcruhab], (b) the ability of a landscape to support organism movement and link habitats [@suraci2023], (c) spatial variation of habitat quality, which is lowered by the presence of and proximity to habitat threats, using the InVEST Habitat Quality model [@halperin2022; @invest], (d) the degree to which a location remains in its natural state without human influence [@suraci2023], (e) presence of federally listed species and overall species richness [@IDcruhab], (f) sites that support biotic assembleges characteristic of the geophysical setting [@anderson2023], (g) sites with high diversity of topoclimates accessible to species [@anderson2023], and (h) important wetland/riparian habitats [@IDcruhab].
+
+:::
+
+### Recreation {#sec-recreation-supp}
+
+We used two NCP indicators that estimate recreation probability. The first was the global-scale recreation probability model ensemble from @hooftman2023 ([@suppfigb-rec]a).
+
+We also created a regional-scale recreation model for the probability of nature-based recreation opportunities on each land use class based on methods from @halperin2022. To estimate recreation opportunities, we calculated the amount of recreation land types -- current parks and trails within each land class [@parkserve; @nps; @padus; @idpr_trails]. These were scaled by public access -- pixels with open access remained as recreation pixels, pixels with closed access were removed, and pixels with restricted or unknown access were given a value of 0.5 [@padus; @nced; @accessyes]. The proportion of recreation pixels to all pixels in a given land class provides a "base" estimate of the probability that recreation can occur in a given land class (@supptblb-rec). We modified the base recreation probabilities in the following ways: 
+
+1. Trails were assigned a recreation probability of 1, with a modified linear decay function increasing the recreation probability of pixels near trails:
+$$
+p_{i} = ((\frac{d_{max}-d_i}{d_{max}}-0.25) + 1) \cdot p_{base}
+$$ {#eq-rec-trails}
+where $p_{i}$ is the modified recreation probability in pixel $i$, $d_{max}$ is the maximum distance to the nearest trail in the study area, $d_i$ is the minimum distance to a trail from pixel $i$, and $p_{base}$ is the base recreation probability in pixel $i$.
+2. Park pixels within 0.5 km of an urban/highly developed or transportation pixel were assigned a recreation probability of 1 since they are easily accessible to general populations. Park locations far from urban areas and roads are subject to the trail decay function, as these areas would not be easily accessible to the public.
+3. Pixels closed to public access were assigned a recreation probability of 0, and pixels with restricted or unknown access were assigned half their base probability using access information from @padus, @nced, and @accessyes.
+
+We performed these calculations at a 30m scale and then aggregated our model to a 1km resolution. The average recreation probability for each land class is in @supptblb-rec and the final model is depicted in [@suppfigb-rec]b. The average recreation probability for every land class was higher than its base probability because trail and more accessible park pixels were assigned a probability of 1, and pixels near trails were assigned a higher probability according to @eq-rec-trails. For example, the base recreation probability for croplands was 1%, but their average recreation probability in the final model was 4%. This is because there are often croplands located near trails which provide aesthetic value to recreational experiences.
+
+\newpage
+::: {#supptblb-rec}
+
+{{< embed notebooks/recreation-ncp-models.qmd#tbl-rec >}}
+
+Each land class was assigned a base recreation probability based on percent presence of publicly accessible parks and trails. Probabilities in the final model are higher because trail and more accessible park pixels were assigned a probability of 1, and pixels near trails were assigned a higher probability according to Equation 1.
+
+:::
+
+::: {#suppfigb-rec}
+
+{{< embed notebooks/recreation-ncp-models.qmd#fig-rec >}}
+
+The recreation indicators in the sensitivity analysis included (a) a global-scale recreation probability model ensemble [@hooftman2023] and (b) a regional-scale recreation model for the probability of nature-based recreation opportunities [@halperin2022].
+
+:::
+
+\newpage
+## Land Cost
+
+::: {#suppfigb-landcost}
+
+{{< embed notebooks/land-cost.qmd#fig-landcost >}}
+
+Fair market value estimates for land in Idaho's Snake River Plain [@nolte2020]. The lowest land value is \$40,000/km$^2$
+
+:::
+
+\newpage
+
+## References {.unnumbered}
+
+::: {#refs-appendixB}
+:::
+
+\newpage
+
+# Appendix C: Systematic Conservation Planning
+
+## Correlation between NCP data layers
+
+::: {#suppfigc-corrs}
+
+{{< embed notebooks/selecting-features.qmd#fig-corrs >}}
+
+Pearson correlation coefficients between each NCP indicator. Very few (5 pairs) were highly correlated with a correlation coefficient >0.75.
+
+:::
+
+## Sensitivity analysis for NCP categories
+
+::: {#suppfigc-clim-emd-mit}
+
+{{< embed notebooks/clim-sens-analysis.qmd#fig-clim-emd-mit >}}
+
+We measured the Earth Mover's Distance [EMD] between every possible combination of our three C stock protection indicators and the optimal solution using all three indicators the "full solution") at different protection targets. The solutions with the lowest area under the EMD curve [AUC], showing that they are closest to the full solution across all targets, are depicted in purple. The table reports the AUC values for the closest solutions as well as the indicators that these solutions omit. The EMDs of the other solutions are shown in gray. 
+
+:::
+
+::: {#suppfigc-clim-emd-adap}
+
+{{< embed notebooks/clim-sens-analysis.qmd#fig-clim-emd-adap >}}
+
+We measured the Earth Mover's Distance [EMD] between each solution for our two climate adaptation indicators and the optimal solution using both indicators (the "full solution") at different protection targets. The EMD of each solution to the full solution is depicted in purple. The table reports the AUC values for the closest solutions as well as the inputs that these solutions omit.
+
+:::
+
+::: {#suppfigc-food-emd}
+
+{{< embed notebooks/food-sens-analysis.qmd#fig-food-emd >}}
+
+We measured the Earth Mover's Distance [EMD] between every possible combination of our four food and feed indicators and the optimal solution using all four indicators (the "full solution") at different protection targets. The solutions with the lowest area under the EMD curve [AUC], showing that they are closest to the full solution across all targets, are depicted in purple. The table reports the AUC values for the closest solutions as well as the inputs that these solutions omit. The EMDs of the other solutions are shown in gray. 
+
+:::
+
+::: {#suppfigc-watqual-emd}
+
+{{< embed notebooks/waterqual-sens-analysis.qmd#fig-watqual-emd >}}
+
+We measured the Earth Mover's Distance [EMD] between each solution for our two water quality indicators and the optimal solution using both indicators (the "full solution") at different protection targets. The EMD of each solution to the full solution is shown in purple. The table reports the AUC values for both solutions as well as the inputs that these solutions omit.
+
+:::
+
+::: {#suppfigc-habitat-emd}
+
+{{< embed notebooks/hab-sens-analysis.qmd#fig-habitat-emd >}}
+
+We measured the Earth Mover's Distance [EMD] between every possible combination of our eight habitat indicators and the optimal solution using all eight indicators (the "full solution") at different protection targets. The solutions with the lowest area under the EMD curve [AUC], showing that they are closest to the full solution across all targets, are depicted in purple. The table reports the AUC values for the closest solutions as well as the inputs that these solutions omit. The EMDs of the other solutions are shown in gray. 
+
+:::
+
+Additionally, because there were many habitat indicators, we assessed whether there were low AUC solutions with fewer inputs than shown in the 5 lowest AUC solutions.
+
+\newpage
+::: {#supptblc-habitat-auc}
+
+{{< embed notebooks/hab-sens-analysis.qmd#tbl-habitat-auc >}}
+
+We measured the Earth Mover's Distance [EMD] between every possible combination of our eight habitat indicators and the optimal solution using all eight indicators at different protection targets (@suppfigc-habitat-emd). This is an expanded table with the lowest AUC values for each number of inputs as well as the indicators included in each solution. Since a lower number of inputs is desired for ease of computation, the solution with a low AUC (<1) and 4 inputs was chosen.
+
+:::
+
+::: {#suppfigc-rec-emd}
+
+{{< embed notebooks/rec-sens-analysis.qmd#fig-rec-emd >}}
+
+We measured the Earth Mover's Distance [EMD] between each solution for our two recreation indicators and the optimal solution using both indicators (the "full solution") at different protection targets. The EMD of each solution to the full solution is shown in purple. The table reports the AUC values for both solutions as well as the inputs that these solutions omit.
+
+:::
+
+\newpage
+
+# Appendix D: Supplemental Results
+
+## NCP in each land tenure category
+
+::: {#suppfigd-ncp-contribution-21}
+
+{{< embed notebooks/ncp-in-management-categories.qmd#fig-ncp-contribution-21 >}}
+
+Percent of each NCP indicator provided by each land tenure category. All NCP categories are well-represented (>55% fairly well protected) on federal and easement lands except food. The deviation from the expected value is also reported, with the expected value being the percent of the study area in each land tenure category. A positive deviation indicates higher NCP contribution than expected, while a negative deviation indicates lower NCP contribution than expected. Percent of study area for each tenure category is slightly higher than those in @fig-studyarea-2 because the study area and NCP indicators were modified to exclude tribal lands.
+
+:::
+
+\newpage
+## Attributes of different solutions
+
+::: {#supptbld-sol-diffs}
+
+{{< embed notebooks/allNCP-sens-analysis.qmd#tbl-sol-diffs >}}
+
+Attributes of the all-NCP solution and the "leave-one-out" solutions depicted in @fig-diff-maps
+
+:::

@@ -1,0 +1,188 @@
+---
+title: "Habitat Sensitivity Analysis"
+authro: "Carolyn Koehn"
+---
+
+```{r}
+#| label: setup
+
+library(terra)
+library(tidyverse)
+library(gurobi)
+library(prioritizr)
+library(patchwork)
+library(sf)
+source("get_optim_function.R")
+
+pixel_size <- 1000
+epsg <- 5070
+aoi <- st_read("../data/study_area/boundary.shp", quiet=TRUE) %>%
+  st_transform(epsg)
+template <- rast(aoi, resolution=pixel_size)
+
+# table of all model combinations possible for analysis
+grid_out <- tidyr::crossing(Landscape_Condition=0:1, Terrestrial_SOC=0:1, Wet_Rip=0:1, Connectivity=0:1, Integrity=0:1, Terrestrial_Resilience=0:1, Biodiversity_Value=0:1, InVEST=0:1)[-1,]
+```
+
+```{r}
+#| label: "load data"
+#| eval: false
+
+cost <- rast("../data/fmv_5070_1km_USD_per_km2.tif")
+# Cost values are too high for optimization
+cost.mil <- cost/1e6
+
+data_folder <- "../data/habitat"
+
+habitat_rasts <- c(rast(paste0(data_folder, "/ID_crucial_habitat_landscape_condition_rank.tif")),
+                   rast(paste0(data_folder, "/ID_crucial_habitat_terrestrial_species_of_concern_rank.tif")),
+                   rast(paste0(data_folder, "/ID_crucial_habitat_wetland_riparian_rank.tif")),
+                   rast(paste0(data_folder, "/Suraci_connectivity.tif")),
+                   rast(paste0(data_folder, "/Suraci_integrity.tif")),
+                   rast(paste0(data_folder, "/TNC_terrestrial_resilience_z-score_adj.tif")),
+                   rast(paste0(data_folder, "/TNC_biodiversity_value.tif")),
+                   rast(paste0(data_folder, "/InVEST/hab_quality_1km.tif")))
+
+names(habitat_rasts) <- c("Landscape_Condition", "Terrestrial_SOC", "Wet_Rip", "Connectivity", "Integrity", "Terrestrial_Resilience", "Biodiversity_Value", "InVEST")
+```
+
+
+```{r}
+#| label: "optimization series"
+#| eval: false
+
+# create full solution to compare to
+solution_all <- generate_optim(inputs=habitat_rasts[[which(grid_out[nrow(grid_out),] == 1)]],
+                           cost=cost.mil, targets=seq(0.05,0.75,0.05),
+                           output.rasters=TRUE, output.table=FALSE,
+                           force.solve = TRUE)
+solution_all <- rast(solution_all)
+names(solution_all) <- paste0("Target: ", seq(5,75,5), "%")
+solution_all_agg <- aggregate(solution_all, fact=5, fun="mean")
+
+# create data frame for EMD outputs to store
+emd_series <- expand.grid(config = 1:(nrow(grid_out)-1),
+                          target = seq(5,75,5),
+                          emd = NA)
+emd_series$target_label <- paste0("Target: ", emd_series$target, "%")
+
+# calculate optimization and EMD for each combination
+for(i in 1:(nrow(grid_out)-1)) {
+  config <- generate_optim(inputs=habitat_rasts[[which(grid_out[i,] == 1)]],
+                           cost=cost.mil, targets=seq(0.05,0.75,0.05),
+                           output.rasters=TRUE, output.table=FALSE,
+                           force.solve = TRUE)
+  
+  solutions <- rast(config)
+  names(solutions) <- paste0("Target: ", seq(5,75,5), "%")
+  
+  solutions_agg <- aggregate(solutions, fact=5, fun="mean")
+  
+  for(t in names(solutions_agg)) {
+    emd_series[which(emd_series$config == i & emd_series$target_label == t), "emd"] <- emdist::emd2d(
+      A = as.matrix(solutions_agg[[t]], wide=TRUE)/sum(as.matrix(solutions_agg[[t]], wide=TRUE), na.rm=TRUE), 
+      B = as.matrix(solution_all_agg[[t]], wide=TRUE)/sum(as.matrix(solution_all_agg[[t]], wide=TRUE), na.rm=TRUE),
+      xdist = 5, ydist = 5,
+      max.iter = 1000)
+  }
+  # save data ~ every 100 rows to save intermediately 
+  # (intermediate files will be manually deleted)
+  if(i%%6 == 0) {
+    write.csv(emd_series, 
+              paste0("../data/habitat/sensitivity_analysis/emd_series",i,".csv"),
+          row.names = FALSE)
+  }
+}
+
+write.csv(emd_series, "../data/habitat/sensitivity_analysis/emd_series.csv",
+          row.names = FALSE)
+```
+
+Assessment:
+
+First, we would like to see which configurations of inputs have the lowest difference to the full solution across targets. We can do this by calculating the area under the curve for the target-EMD series.
+
+```{r}
+#| label: fig-habitat-emd
+#| fig-height: 6
+
+emd_series <- read.csv("../data/habitat/sensitivity_analysis/emd_series.csv")
+
+grid_out$config <- 1:nrow(grid_out)
+
+emd_series <- left_join(emd_series, grid_out) %>%
+  mutate(ninputs = rowSums(across(Landscape_Condition:InVEST)))
+
+auc_series <- data.frame(config = unique(emd_series$config),
+                  auc = NA)
+
+for(i in unique(emd_series$config)) {
+  series.x <- filter(emd_series, config == i)$target
+  series.y <- filter(emd_series, config == i)$emd
+  
+  AUC <- sum(diff(series.x) * zoo::rollmean(series.y, 2))
+  
+  auc_series[which(auc_series$config == i), "auc"] <- AUC
+}
+
+low_auc_series <- slice_min(auc_series, n=10, order_by=auc) %>%
+  arrange(auc) %>%
+  head(., n=5)
+for(i in 1:nrow(low_auc_series)) {
+  low_auc_series$leaves_out[i] <- paste(colnames(grid_out)[which(grid_out[low_auc_series$config[i],] == 0)], collapse=", ")
+}
+low_auc_series <- low_auc_series %>%
+  mutate(`Leaves Out` = str_replace_all(leaves_out, "Landscape_Condition", "Landscape Condition"),
+         `Leaves Out` = str_replace_all(`Leaves Out`, "Terrestrial_SOC", "Terrestrial Species of Concern"),
+         `Leaves Out` = str_replace_all(`Leaves Out`, "Wet_Rip", "Wetland/Riparian"),
+         `Leaves Out` = str_replace_all(`Leaves Out`, "Connectivity", "Ecological Connectivity"),
+         `Leaves Out` = str_replace_all(`Leaves Out`, "Integrity", "Ecological Integrity"),
+         `Leaves Out` = str_replace_all(`Leaves Out`, "Terrestrial_Resilience", "Terrestrial Resilience"),
+         `Leaves Out` = str_replace_all(`Leaves Out`, "Biodiversity_Value", "Biodiversity Value"),
+         `Leaves Out` = str_replace_all(`Leaves Out`, "InVEST", "Habitat Quality")) %>%
+  select(-leaves_out) %>%
+  rename("AUC" = "auc")
+
+emd_plot <- ggplot(emd_series, aes(x=target, y=emd, group=as.factor(config))) +
+  geom_line(color="gray80") +
+  geom_line(data=filter(emd_series, config %in% low_auc_series$config),
+            color="purple", show.legend = FALSE) +
+  scale_x_continuous(limits=c(5,75), breaks=seq(5,75,5),
+                     name = "Target (% NCP protected)") +
+  scale_y_continuous(limits=c(0,75), breaks = c(0,25,50,75)) +
+  ylab("Difference from full solution (EMD)") +
+  theme_classic() +
+  theme(panel.background = element_blank())
+
+emd_plot + inset_element(patchwork::wrap_table(select(low_auc_series, -config)), 
+                         left=0.45, bottom=0.65, right=1, top=1.02,
+                         on_top = FALSE)
+```
+
+We might also like to test the nearest solution to the full solution at our intended target (here, 30%).
+
+```{r}
+filter(emd_series, target==30 & 
+         emd == min(filter(emd_series, target==30)$emd)) %>%
+  arrange(ninputs) %>%
+  select(-c(config, target_label))
+```
+
+With so many layers, there may be a "good enough" solution with much fewer layers. Here, we list the lowest AUC values for each possible number of inputs. A solution with fewer inputs is preferred computationally.
+
+```{r}
+#| label: tbl-habitat-auc
+
+auc_table <- left_join(auc_series, grid_out) %>%
+  mutate(ninputs = rowSums(across(Landscape_Condition:InVEST))) %>%
+  group_by(ninputs) %>%
+  slice_min(n=3, order_by=auc) %>%
+  select(-config) %>%
+  relocate(ninputs, .after=auc) %>%
+  arrange(auc) %>%
+  mutate(across(Landscape_Condition:InVEST, ~ifelse(.x==0, "No", "Yes")))
+
+knitr::kable(auc_table, digits = 4, align="l",
+             col.names = c("AUC", "Num Inputs", "Landscape Condition", "Terrestrial Species of Concern", "Wetland / Riparian", "Ecological Connectivity", "Ecological Integrity", "Terrestrial Resilience", "Biodiversity Value", "Habitat Quality"))
+```
+

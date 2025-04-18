@@ -1,0 +1,69 @@
+project:
+  type: manuscript
+  
+manuscript: 
+  article: Koehn_etal_2025_Key targets for conservation planning.qmd
+
+execute:
+  echo: false
+  freeze: false
+  
+filters:
+  - multibib
+validate-yaml: false
+citeproc: false
+  
+bibliography: 
+  main: Koehn_etal_2025_main.bib
+  appendixA: Koehn_etal_2025_appA.bib
+  appendixB: Koehn_etal_2025_appB.bib
+csl: elsevier-harvard-modified.csl
+
+format:
+  docx: 
+    reference-doc: custom-reference-doc.docx
+    notebook-links: false
+    number-sections: true
+    fig-format: png
+    df-print: kable
+    link-bibliography: false
+    link-citations: false
+    crossref:
+      ref-hyperlink: false
+      custom:
+        - kind: float
+          key: supptbla
+          reference-prefix: Table A
+          space-before-numbering: false
+          caption-location: top
+        - kind: float
+          key: suppfiga
+          reference-prefix: Figure A
+          space-before-numbering: false
+        - kind: float
+          key: supptblb
+          reference-prefix: Table B
+          space-before-numbering: false
+          caption-location: top
+        - kind: float
+          key: suppfigb
+          reference-prefix: Figure B
+          space-before-numbering: false
+        - kind: float
+          key: supptblc
+          reference-prefix: Table C
+          space-before-numbering: false
+          caption-location: top
+        - kind: float
+          key: suppfigc
+          reference-prefix: Figure C
+          space-before-numbering: false
+        - kind: float
+          key: supptbld
+          reference-prefix: Table D
+          space-before-numbering: false
+          caption-location: top
+        - kind: float
+          key: suppfigd
+          reference-prefix: Figure D
+          space-before-numbering: false

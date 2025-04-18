@@ -1,0 +1,344 @@
+---
+title: "NCP in land tenure categories"
+author: "Carolyn Koehn"
+---
+
+```{r}
+#| label: setup
+
+library(sf)
+library(tidyverse)
+library(terra)
+library(ggnewscale)
+
+pixel_size <- 1000
+epsg <- 5070
+
+aoi <- st_read("../data/study_area/boundary.shp", quiet=TRUE) %>%
+  st_transform(epsg)
+
+template_1km <- rast(aoi, resolution=pixel_size)
+```
+
+Re-categorize BLM surface management agency data. The API call is the 2023 BLM Idaho Surface Management Agency (Surface Ownership) dataset, also available for download at https://gbp-blm-egis.hub.arcgis.com/pages/idaho.
+
+```{r}
+#| label: "BLM-SMA prep"
+#| warning: false
+
+id_lt <- st_read("https://gis.blm.gov/idarcgis/rest/services/realty/BLM_ID_Surface_Management_Agency/FeatureServer/0/query?where=1%3D1&outFields=MGMT_AGNCY,AGNCY_NAME&outSR=4326&f=json", quiet=TRUE) %>%
+  st_transform(st_crs(aoi)) %>%
+  st_make_valid()
+lt <- st_intersection(id_lt, aoi)
+lt$Simple_Tenure <- ifelse(lt$AGNCY_NAME == "PRIVATE", "Private",
+                            ifelse(lt$AGNCY_NAME %in% c("BIA", "IR"), "Tribal",
+                              ifelse(lt$AGNCY_NAME %in% c("OTHER", "HSTRCWTR"), "Other",
+                                ifelse(str_starts(lt$AGNCY_NAME, "STATE"), "State", "Federal"))))
+
+lt_merge <- lt %>%
+  group_by(Simple_Tenure) %>%
+  group_modify(~ st_union(.x) %>% as_tibble()) %>%
+  ungroup() %>%
+  st_as_sf()
+```
+
+Crop PALD data. `PALD_public_May2024.zip` was requested from American Farmland Trust (maps\@farmland.org) in July 2024 (https://farmlandinfo.org/statistics/pald/).
+
+```{r}
+#| label: "PALD prep"
+#| warning: false
+
+pald <- st_read("/vsizip/../data/PALD_public_May2024.zip/PALD_public_May2024.shp", quiet=TRUE) %>%
+  filter(state == "Idaho") %>%
+  st_transform(epsg) %>%
+  st_make_valid(.) %>%
+  st_intersection(., aoi)
+```
+
+Filter NCED easements to those with non-agricultural purposes and convert to raster. `NCED_03082024_shp.zip` is the Complete U.S. NCED Dataset retrieved from https://www.conservationeasement.us/downloads.
+
+```{r}
+#| label: "NCED prep"
+#| warning: false
+
+nced_non_farm <- st_read("/vsizip/../data/NCED_07232024_shp.zip/NCED_Polygons_07232024.shp", quiet=TRUE) %>%
+  filter(state == "ID") %>%
+  st_transform(st_crs(aoi)) %>%
+  st_make_valid() %>%
+  st_intersection(., aoi) %>%
+  
+  filter(duration == "PERM") %>%
+  filter(!(purpose %in% c("FARM", "RAN"))) %>%
+  filter(!(str_detect(sitename, pattern = "Farm") |
+           str_detect(sitename, pattern = "Ranch") |
+           str_detect(sitename, pattern = "Agricultur") |
+           str_detect(sitename, pattern = "Grassland")))
+
+nced_non_farm <- st_difference(nced_non_farm, st_union(pald))
+```
+
+Subtract easements and PALs from private land category, and add PALs and easements to the land tenure vector data:
+
+```{r}
+private_no_pals <- st_difference(lt_merge[which(lt_merge$Simple_Tenure == "Private"),], st_union(pald))
+private_no_pals_otheas <- st_difference(private_no_pals, st_union(nced_non_farm))
+
+# cast to multipolygon
+new_private <- private_no_pals_otheas %>%
+  st_collection_extract() %>%
+  st_cast('MULTIPOLYGON') %>%
+  st_union() %>%
+  st_as_sf() %>%
+  mutate(Simple_Tenure = "Private") %>%
+  rename(geometry = x) %>%
+  relocate(Simple_Tenure)
+
+lt_merge[which(lt_merge$Simple_Tenure == "Private"), ] <- new_private
+
+pald_merge <- st_as_sf(st_union(pald)) %>%
+  mutate(Simple_Tenure = "PAL") %>%
+  rename(geometry = x) %>%
+  relocate(Simple_Tenure)
+eas_merge <- st_as_sf(st_union(nced_non_farm)) %>%
+  mutate(Simple_Tenure = "Other_easements") %>%
+  rename(geometry = x) %>%
+  relocate(Simple_Tenure)
+
+lt_merge <- rbind(lt_merge, pald_merge, eas_merge)
+```
+
+Create data.frame to hold relative NCP representation in each category:
+
+```{r}
+lt_merge_filt <- filter(lt_merge,
+                        !(Simple_Tenure %in% c("Tribal", "Other")))
+
+lt_table <- data.frame(LT = lt_merge_filt$Simple_Tenure,
+                       Area = round(units::set_units(st_area(lt_merge_filt), "km^2"), 0)) %>%
+  mutate(Percent = units::drop_units(Area/sum(Area)*100))
+lt_table <- arrange(lt_table, desc(Percent))
+
+# percentages are different from the land tenure figure because they have been re-calculated for the non-tribal study area
+lt_table <- lt_table %>%
+  select(-Area)
+```
+
+Import NCP models:
+
+```{r}
+climatemit_rasts <- c(rast("../data/climate_mitigation/Hengl_soil_organic_C_estimates.tif"),
+                   rast("../data/climate_mitigation/Spawn_2010_carbon_storage_estimate.tif"),
+                   rast("../data/climate_mitigation/InVEST/tot_c_cur_1km.tif"))
+names(climatemit_rasts) <- c("SOC", "CStorage", "InVESTCarbon")
+
+climateadap_rasts <- c(rast("../data/climate_mitigation/Hamann_2014_climate_accessibility.tif"),
+                   rast("../data/climate_mitigation/Carroll_2018_climate_stability.tif"))
+names(climateadap_rasts) <- c("ClimAcc", "ClimStability")
+
+food_rasts <- c(rast("../data/food_and_feed/5-yr_CropYields.tif"),
+                rast("../data/food_and_feed/5-yr_LivestockCropYields.tif"),
+                rast("../data/food_and_feed/5-yr_CropYieldValue.tif"),
+                rast("../data/food_and_feed/PVR_2016_clip_5070_1km.tif"))
+names(food_rasts) <- c("CropYield", "LvstkCropYield", "CropValue", "PVR")
+
+watqual_rasts <- c(rast("../data/water_quality/watershed_retention-load_ratio.tif"),
+               rast("../data/water_quality/watershed_nitrate_rank.tif"))
+names(watqual_rasts) <- c("Retention", "Nitrates")
+
+data_folder <- "../data/habitat"
+habitat_rasts <- c(rast(paste0(data_folder, "/ID_crucial_habitat_landscape_condition_rank.tif")),
+                   rast(paste0(data_folder, "/ID_crucial_habitat_terrestrial_species_of_concern_rank.tif")),
+                   rast(paste0(data_folder, "/ID_crucial_habitat_wetland_riparian_rank.tif")),
+                   rast(paste0(data_folder, "/Suraci_connectivity.tif")),
+                   rast(paste0(data_folder, "/Suraci_integrity.tif")),
+                   rast(paste0(data_folder, "/TNC_terrestrial_resilience_z-score_adj.tif")),
+                   rast(paste0(data_folder, "/TNC_biodiversity_value.tif")),
+                   rast(paste0(data_folder, "/InVEST/hab_quality_1km.tif")))
+names(habitat_rasts) <- c("Landscape_Condition", "Terrestrial_SOC", "Wet_Rip", "Connectivity", "Integrity", "Terrestrial_Resilience", "Biodiversity_Value", "InVESTHabitat")
+
+rec_rasts <- c(rast("../data/recreation/Hooftman_recreation_ensemble.tif"),
+         rast("../data/recreation/rec_prob.tif"))
+names(rec_rasts) <- c("RecProb_Hooftman", "RecProb_region")
+
+all_ncp_rasts <- c(climatemit_rasts,
+                   climateadap_rasts,
+                   food_rasts,
+                   watqual_rasts,
+                   habitat_rasts,
+                   rec_rasts)
+```
+
+Extract total sums of NCP for each land tenure category and across the study area:
+
+```{r}
+ncp_sums_lt <- exactextractr::exact_extract(all_ncp_rasts, lt_merge_filt, fun="sum",
+                                     append_cols=TRUE,
+                                     progress=F)
+ncp_sums_all <- colSums(ncp_sums_lt[,-1], na.rm=T)
+# remove prefix
+names(ncp_sums_all) <- str_remove(names(ncp_sums_all), "sum.")
+```
+
+Calculate percent representation:
+
+```{r}
+ncp_lt_table <- lt_table %>%
+  # join NCP sums and percent area tables
+  left_join(., ncp_sums_lt, by=c("LT" = "Simple_Tenure")) %>%
+  # convert to tidy format
+  pivot_longer(., cols=!c(LT, Percent),
+               names_to = "NCP",
+               values_to = "NCP_cat_sum") %>%
+  # remove prefix from exactextractr
+  mutate(NCP = str_remove(NCP, "sum.")) %>%
+  # join regional NCP totals
+  left_join(., 
+            data.frame(NCP = names(ncp_sums_all),
+                       NCP_region_total = ncp_sums_all)) %>%
+  # calculate percent represenation and deviance from expected (percent of land area)
+  mutate(Percent_rep = NCP_cat_sum/NCP_region_total*100,
+         Rep_deviance = Percent_rep-Percent) %>%
+  # select columns
+  select(LT, NCP, Percent_rep, Rep_deviance) %>%
+  # data prep for figure
+  mutate(LT = factor(LT,
+                     levels=lt_table$LT),
+         label = round(Percent_rep, 1),
+         rep_dev_label = ifelse(round(Rep_deviance,1)>0,
+                        paste0("+", round(Rep_deviance,1)),
+                        as.character(round(Rep_deviance,1))))
+
+ncp_lt_table <- rbind(ncp_lt_table, 
+                      data.frame(LT=lt_table$LT,
+                                 NCP="Percent of Study Area",
+                                 Percent_rep=lt_table$Percent,
+                                 Rep_deviance = NA,
+                                 label = round(lt_table$Percent, 1),
+                                 rep_dev_label = NA)) %>%
+  mutate(Rep_deviance_bins = cut(Rep_deviance, breaks=c(-5,-0.1,0.1,5)),
+         Rep_deviance_bins = ifelse((is.na(Rep_deviance_bins) & Rep_deviance<0), "<-5",
+                                    ifelse((is.na(Rep_deviance_bins) & Rep_deviance>0), ">5", as.character(Rep_deviance_bins))),
+         Rep_deviance_bins = factor(Rep_deviance_bins,
+                                    levels = c("<-5", "(-5,-0.1]", "(-0.1,0.1]", "(0.1,5]", ">5")))
+```
+
+Contribution of each category to NCP:
+
+```{r}
+#| label: "fig-ncp-contribution-21"
+#| fig-height: 9.25
+#| fig-width: 8
+
+# create labels
+y_labels <- c("Recreation Probability\n(regional estimate)", "Recreation Probability\n(Hooftman et al. 2023)", "Habitat Quality", "Biodiversity Value", "Terrestrial Resilience", "Ecological Integrity", "Ecological Connectivity", "Wetland/Riparian", "Terrestrial Species of Concern", "Landscape Condition", "Estimated Nitrates", "N Retention Capacity", "Agricultural Potential", "Crop Value", "Livestock Feed Provision", "Crop Provision", "Climate Stability", "Climate Accessibility", "C Storage\n(InVEST model)", "C Storage\n(Spawn & Gibbs 2020)", "Soil Organic C", "Percent of Study Area")
+
+ggplot(ncp_lt_table, aes(y=NCP, x=LT)) +
+  geom_tile(aes(fill=Percent_rep), show.legend = T, alpha=0.75) +
+  geom_text(aes(label=label), nudge_x=-0.25) +
+  scale_fill_viridis_c(limits=c(0,100), name=" Percent\nProvided",
+                       guide = guide_colourbar(order=1)) +
+  new_scale_fill() +
+  geom_label(aes(fill=Rep_deviance, size=Rep_deviance_bins, label=rep_dev_label),
+             nudge_x = 0.25, color="black") +
+  scale_fill_gradient2(low="#d6604d", high="#4393c3", mid="#f7f7f7",
+                       name = "Deviation from\nexpected (%)", 
+                       breaks=seq(-60,60,30), limits=c(-63,63),
+                       guide = guide_colourbar(order=2)) +
+  scale_size_manual(values = c(4,3.5,3,3.5,4), guide="none") +
+  geom_hline(yintercept = 21.5) +
+  scale_y_discrete(limits=c(rev(names(all_ncp_rasts)), "Percent of Study Area"),
+                   name="NCP category",
+                   labels = y_labels) +
+  scale_x_discrete(limits=levels(ncp_lt_table$LT),
+                   name="Land Tenure Category",
+                   position = "top",
+                   labels=rev(c("Other\neasement", "PAL", "State", "Private", "Federal"))) +
+  theme_classic() +
+  theme(axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        text = element_text(size=14),
+        legend.position = "bottom",
+        legend.title = element_text(hjust=1, size=10),
+        axis.title = element_text(size=12))
+```
+
+Figure with summaries for each NCP bin:
+
+```{r}
+#| label: "fig-ncp-proc"
+#| fig-cap: "Summarized percent of each NCP category provided by each land tenure category. Deviation from expected measures a land tenure categories contributions relative to their size. If a category covers 30% of the study area and contributes 30% of total recreation NCP, the deviation from expected is 0. Percent of land area for each land tenure category is slightly higher than those in @fig-studyarea-2 because the study area and NCP indicators were modified to exclude tribal lands."
+#| fig-height: 4.75
+#| fig-width: 6.75
+
+ncp_bins_lt_table <- ncp_lt_table %>%
+  mutate(NCP_bin = ifelse(NCP %in% names(climatemit_rasts), "C Stock Protection",
+                          ifelse(NCP %in% names(climateadap_rasts), "Climate Adaptation",
+                          ifelse(NCP %in% names(food_rasts), "Food",
+                                 ifelse(NCP %in% names(watqual_rasts), "WatQual",
+                                        ifelse(NCP %in% names(habitat_rasts), "Habitat",
+                                        ifelse(NCP %in% names(rec_rasts), "Recreation", NA))))))) %>%
+  group_by(LT, NCP_bin) %>%
+  summarise(avg_rep = mean(Percent_rep),
+            avg_dev = mean(Rep_deviance)) %>%
+  mutate(label = round(avg_rep, 1),
+         rep_dev_label = ifelse(round(avg_dev,1)>0,
+                        paste0("+", round(avg_dev,1)),
+                        as.character(round(avg_dev,1))))
+ncp_bins_lt_table <- rbind(ncp_bins_lt_table, 
+                           data.frame(LT=lt_table$LT,
+                                      NCP_bin="Percent of Study Area",
+                                      avg_rep=lt_table$Percent,
+                                      avg_dev = NA,
+                                      label = round(lt_table$Percent,1),
+                                      rep_dev_label=NA)) %>%
+  mutate(Rep_deviance_bins = cut(avg_dev, breaks=c(-5,-0.1,0.1,5)),
+         Rep_deviance_bins = ifelse((is.na(Rep_deviance_bins) & avg_dev<0), "<-5",
+                                    ifelse((is.na(Rep_deviance_bins) & avg_dev>0), ">5", as.character(Rep_deviance_bins))),
+         Rep_deviance_bins = factor(Rep_deviance_bins,
+                                    levels = c("<-5", "(-5,-0.1]", "(-0.1,0.1]", "(0.1,5]", ">5")))
+
+figure2 <- ggplot(ncp_bins_lt_table, aes(y=NCP_bin, x=LT)) +
+  geom_tile(show.legend = T, alpha=0.75, aes(fill=avg_rep)) +
+  geom_text(aes(label=label), nudge_x=-0.25) +
+  scale_fill_viridis_c(limits=c(0,90), name="Percent\nProvided",
+                       breaks=c(0,30,60,90),
+                       guide = guide_colourbar(order=1)) +
+  new_scale_fill() +
+  geom_label(aes(fill=avg_dev, size=Rep_deviance_bins, label=rep_dev_label),
+             nudge_x = 0.25, color="black") +
+  scale_fill_gradient2(low="#d6604d", high="#4393c3", mid="#f7f7f7",
+                       name = "Deviation from\nexpected (%)", limits=c(-51,51),
+                       guide = guide_colourbar(order=2)) +
+  scale_size_manual(values = c(4,3.5,3,3.5,4), guide="none") +
+  geom_hline(yintercept = 6.5) +
+  scale_y_discrete(name="NCP category",
+                   limits=rev(c("Percent of Study Area", "C Stock Protection", "Climate Adaptation", "Food", "WatQual", "Habitat", "Recreation")),
+                   labels = rev(c("Percent of\nStudy Area", "C Stock\nProtection", "Climate\nAdaptation", "Food", "Water\nQuality", "Habitat", "Recreation"))) +
+  scale_x_discrete(limits=levels(ncp_lt_table$LT),
+                   name="Land Tenure Category",
+                   position = "top",
+                   labels=rev(c("Other\neasement", "PAL", "State", "Private", "Federal"))) +
+  theme_classic() +
+  theme(axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_text(hjust=1, size=10),
+        axis.title = element_text(size=12))
+
+figure2
+```
+
+Save as image file:
+
+```{r}
+#| eval: false
+
+png(filename = "../figures/Figure_2.png",
+    width = 6.75,
+    height = 4.75,
+    units = "in",
+    res = 90)
+figure2
+dev.off()
+```
+

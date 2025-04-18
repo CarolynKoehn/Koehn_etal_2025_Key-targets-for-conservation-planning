@@ -1,0 +1,323 @@
+---
+title: "Recreation NCP models"
+author: "Carolyn Koehn"
+---
+
+```{r}
+#| label: setup
+
+library(sf)
+library(tidyverse)
+library(terra)
+library(patchwork, quietly = TRUE)
+
+pixel_size <- 1000
+epsg <- 5070
+
+aoi <- st_read("../data/study_area/boundary.shp", quiet=TRUE) %>%
+  st_transform(epsg)
+
+template_1km <- rast(aoi, resolution=pixel_size)
+template_30m <- rast(aoi, resolution=30)
+```
+
+Global ensemble of recreation ecosystem services downloaded from https://doi.org/10.5285/bd940dad-9bf4-40d9-891b-161f3dfe8e86
+
+```{r}
+#| eval: false
+
+hooft_rec <- rast("../data/recreation/raw_data/Median_Recreation_Ensemble_Publish.tif")
+hooft_rec <- project(hooft_rec, template_1km)
+hooft_rec <- crop(hooft_rec, aoi, mask=TRUE)
+
+writeRaster(hooft_rec, 
+            "../data/recreation/Hooftman_recreation_ensemble.tif",
+            datatype = "FLT4S",
+            overwrite = TRUE)
+```
+
+Halperin et al. (2023) developed a recreation probability model for Ada and Canyon counties in Idaho. We adpated their model to the southern Idaho regional scale with the following data inputs:
+
+1. Parks in urban areas from ParkServe, downloaded at https://www.tpl.org/park-data-downloads
+2. National parks from the National Park Service, downloaded at https://www.arcgis.com/home/item.html?id=c8d60ffcbf5c4030a17762fe10e81c6a
+3. State parks and public access data from PAD-US, downloaded at https://www.usgs.gov/programs/gap-analysis-project/science/pad-us-data-overview
+4. Land cover data from [AFT](https://csp-fut.appspot.com/) can be requested: https://survey123.arcgis.com/share/3f8d2e46cec64288b53d235fa7cf7d40
+5. Idaho trails were downloaded from https://idpr-data-idaho.hub.arcgis.com/maps/idaho::idaho-recreation-trails/about (Layer: [Idaho Routes](https://idpr-data-idaho.hub.arcgis.com/datasets/idaho::idaho-routes/))
+6. Additional public access data was retrieved from the National Conservation Easements database (https://www.conservationeasement.us/downloads/) and Idaho Department of Fish and Game Access Yes! database (https://data-idfggis.opendata.arcgis.com/datasets/IDFGgis::access-yes-properties/about)
+
+The general workflow is (1) assign recreation access probability to all pixels, (2) average recreation access probability across each land use, assigning each land type a "base" recreation probability, and (3) adjust the base probability based on recreation or restriction features.
+
+First, we assign recreation access probability based on parks and trails (access probability of 1), Access Yes! properties (access probability of 1), and access information from PAD-US and NCED (closed access is probility 0, restricted access is probability 0.5, and open access is probability 1).
+
+```{r}
+#| eval: false
+
+# known parks
+urban_parks <- st_read("/vsizip/../data/recreation/raw_data/Parkserve_Shapefiles_05212024.zip/ParkServe_Parks.shp") %>%
+  filter(stringr::str_detect(Park_Urban, "ID")) %>%
+  st_make_valid() %>%
+  st_transform(., epsg) %>%
+  st_intersection(., aoi)
+
+nat_parks <- st_read("/vsizip/../data/recreation/raw_data/NPS_-_Land_Resources_Division_Boundary_and_Tract_Data_Service.zip/NPS_-_Land_Resources_Division_Boundary_and_Tract_Data_Service.shp") %>%
+  st_transform(., epsg) %>%
+  st_make_valid() %>%
+  st_intersection(., aoi)
+
+padus <- st_read("/vsizip/../data/habitat/raw_data/PADUS3_0_State_ID_SHP.zip/PADUS3_0Combined_StateID.shp") %>%
+  st_transform(., epsg) %>%
+  st_make_valid() %>%
+  st_intersection(. ,aoi)
+state_parks <- padus %>%
+  filter(str_detect(Unit_Nm, "State Park"))
+
+# give parks a recreation probability of 1
+parks.stack <- c(rasterize(urban_parks, template_30m, field=1, background=0, touches=TRUE),
+                 rasterize(nat_parks, template_30m, field=1, background=0, touches=TRUE),
+                 rasterize(state_parks, template_30m, field=1, background=0, touches=TRUE))
+parks.r <- max(parks.stack, na.rm=TRUE)
+
+# Trails
+
+# download TIGER US Census roads shapefiles
+all_roads <- tigris::roads(state="ID", county=c("Jefferson", "Gem", "Madison", "Jerome", "Bonneville", "Teton", "Power" ,"Blaine", "Elmore", "Butte", "Minidoka", "Bingham","Ada County", "Cassia", "Payette", "Fremont", "Bannock", "Twin Falls", "Owyhee", "Washington", "Gooding", "Lincoln", "Camas", "Canyon", "Clark", "Adams"))
+# Trails (walkways, trails, paths)
+trails <- all_roads %>%
+  filter(MTFCC %in% c("S1500","S1710","S1820","S1830")) %>%
+  st_transform(epsg)
+# supplemented with Idaho Parks and Recreation Trails data
+IDPR_trails <- st_read("/vsizip/../data/habitat/raw_data/Idaho_Recreation_Trails_-4261848000673127905.zip/Idaho_Routes.shp") %>%
+  st_make_valid() %>%
+  st_transform(epsg) %>%
+  st_intersection(., aoi)
+# supplemented with ParkServe data
+urban_trails <- st_read("/vsizip/../data/recreation/raw_data/Parkserve_Shapefiles_05212024.zip/ParkServe_Roads_Trails.shp") %>% 
+  st_transform(., epsg) %>% 
+  st_intersection(., aoi)
+
+# give trails a recreation probability of 1
+trails.stack <- c(rasterize(trails, template_30m, field=1, background=0, touches=TRUE),
+                 rasterize(IDPR_trails, template_30m, field=1, background=0, touches=TRUE),
+                 rasterize(urban_trails, template_30m, field=1, background=0, touches=TRUE))
+trails.r <- max(trails.stack, na.rm=TRUE)
+
+# Access guarantees and restrictions
+
+# guaranteed access to private lands from Access Yes! properties
+acc_yes <- st_read("/vsizip/../data/recreation/raw_data/Access_Yes!_Properties.zip/Access_Yes!_Properties.shp") %>%
+  st_transform(epsg) %>%
+  st_make_valid() %>%
+  st_intersection(., aoi)
+
+# easements have varying levels of access
+nced_easements <- st_read("/vsizip/../data/NCED_03082024_shp.zip/NCED_Polygons_03082024.shp") %>%
+  filter(state == "ID") %>%
+  st_transform(epsg) %>%
+  st_make_valid() %>%
+  st_intersection(., aoi) %>%
+  mutate(access_prob = ifelse(pubaccess == "OA", 1,
+                              ifelse(pubaccess == "XA", 0, 0.5)))
+
+# pad-us records varying levels of access
+padus <- padus %>%
+  mutate(access_prob = ifelse(Pub_Access == "OA", 1,
+                              ifelse(Pub_Access == "XA", 0, 0.5)))
+
+pubaccess.stack <- c(rasterize(acc_yes, template_30m, field=1, background=NA),
+                     rasterize(nced_easements, template_30m, field="access_prob", background=NA),
+                     rasterize(padus, template_30m, field="access_prob", background=NA))
+# use most conservative restrictions
+pubaccess.r <- min(pubaccess.stack, na.rm=TRUE)
+
+# combine parks and trails
+rec.known <- parks.r + trails.r
+rec.known[rec.known>1] <- 1
+
+# multiply parks and trails by restrictions/guarantees
+# basically, acknowledge areas where parks/trails have restricted access
+rec.known.restrict <- prod(rec.known, pubaccess.r, na.rm=T)
+rec.known.restrict <- mask(rec.known.restrict, aoi)
+```
+
+Next, we assign each land type a "base" recreation probability based on the presence of known and restricted recreation.
+
+```{r}
+#| eval: false
+
+# code to create this land use layer is in notebooks/climate-mitigation-ncp-models.qmd
+lu <- rast("../data/AFT_land_cover_2016_5070_30m_clip_reclassify_NAis0.tif")
+
+source("get_weighted_params_functions.R")
+
+data_without_params <- project(lu, template_30m, method = "near")
+data_with_params <- rec.known.restrict
+
+rastStack <- c(data_without_params, data_with_params)
+
+#  Land class codes and corresponding land classes for each layer
+#    Codes and classes for layer 1
+classes_l1 <- data.frame(Code=c(1,2,3,4,5,6,7,10,12,1101,1102,1103,1104,1106,1107,1110,1112),
+                         Class=c("Cropland", "Pastureland", "Rangeland", "Forestland", "Woodland", "Urban and highly developed areas", "Water", "Other areas", "Transportation", "Cropland within LDR", "Pastureland within LDR", "Rangeland within LDR", "Forestland within LDR", "UHD areas within LDR", "Water within LDR", "Other areas within LDR", "Transportation within LDR"))
+classes_l2 <- data.frame(Code=c(1,0.5,0), Class=c("Known Recreation","Restricted Recreation","Unknown or No Recreation"))
+
+#get a comparison table from get_weighted_params_functions.R
+comp_table <- create_comparison_table(rasterStack = rastStack, labels1 = classes_l1, labels2 = classes_l2)
+
+comp_table_replacena <- comp_table %>%
+  replace(is.na(.), 0)
+
+comp_table_replacena$prob <- comp_table_replacena$`1`/comp_table_replacena$Total_Area +
+  (comp_table_replacena$`0.5`/comp_table_replacena$Total_Area)*0.5
+
+rec.class <- classify(lu, comp_table_replacena[,c("L1_code","prob")])
+rec.class <- mask(rec.class, aoi)
+```
+
+Finally, we adjust the base recreation probability based on the presence of the following features:
+
+1. Trails are given a recreation probability of 1, with a decay function so the probability of recreation is increased from a land class's base probability near a trail and decreases linearly based on distance from a trail in rangelands, forestlands, and woodlands. It is assumed that off-trail recreation is at its base probability with no decay function in crop-, pasture-, and urban lands.
+2. Urban parks (parks within 0.5 km of an urban/developed area or transportation pixel) are given a recreation probability of 1 since they are easily accessible. Park locations far from urban areas and trails are subject to the trail decay function, as these areas would not be easily accessible to the public.
+3. Restricted and closed access multipliers are applied to enforce public access restrictions.
+
+```{r}
+#| eval: false
+
+# trails and their decay function
+trails.decay_dist <- distance(trails.r, target=1)
+trails.decay_dist <- mask(trails.decay_dist, aoi)
+trails.decay_reverse <- (trails.decay_dist*-1 + max(trails.decay_dist[], na.rm=T)) / max(trails.decay_dist[], na.rm=T)
+trails.decay_adj <- ifel(trails.decay_reverse==1, 2, (trails.decay_reverse-0.25)+1)
+# align raster extents
+trails.decay_adj <- resample(trails.decay_adj, rec.class)
+
+rec.class_trails <- ifel(trails.decay_adj==2, 
+                         1, 
+                         ifel(lu %in% c(3, 4, 5, 1103, 1104, 1105), 
+                              prod(rec.class, trails.decay_adj), 
+                              rec.class))
+
+# urban parks
+urban_land <- ifel(lu %in% c(6,1106, 12, 1112), 1, NA)
+# buffer doesn't work with large number of pixels, so I apply the buffer around urban land county by county
+county_list <- tigris::counties("ID") %>%
+  st_transform(crs=st_crs(aoi)) %>%
+  st_intersection(., aoi)
+urban_buff <- vector("list", nrow(county_list))
+for(i in 1:length(urban_buff)) {
+  county_urban_buff <- terra::buffer(x=crop(urban_land, county_list[i,]),
+                                     width=500, background=NA)
+  county_urban_buff <- ifel(crop(urban_land, county_list[i,])==1, 1, county_urban_buff)
+  urban_buff[[i]] <- county_urban_buff
+}
+urban_buff_all <- mosaic(sprc(urban_buff), fun="max")
+parks.r <- resample(parks.r, urban_buff_all)
+urban_parks.r <- ifel(parks.r==1 & urban_buff_all==1, 1, NA)
+urban_parks.r <- extend(urban_parks.r, rec.class_trails)
+
+rec.class_trails_urbanparks <- ifel(urban_parks.r == 1, 1, rec.class_trails)
+
+# match extents
+rec.class_trails_urbanparks <- resample(rec.class_trails_urbanparks, pubaccess.r)
+# restricted access and closed access
+rec.class_trails_urbanparks_acc <- prod(rec.class_trails_urbanparks, pubaccess.r, na.rm=T)
+
+# aggregate to 1km and save
+rec.model <- resample(rec.class_trails_urbanparks_acc, template_1km,
+                      method="bilinear")
+
+writeRaster(rec.model,
+            "../data/recreation/rec_prob.tif",
+            datatype="FLT4S",
+            overwrite=TRUE)
+```
+
+```{r}
+#| eval: false
+
+prob_by_lu <- comp_table_replacena[,c("L1_code", "Class", "prob")]
+prob_by_lu$final_model_prob <- NA
+
+lu_1km <- resample(lu, template_1km, method="mode")
+lu_layers <- segregate(lu_1km)
+
+for (i in 1:nrow(prob_by_lu)) {
+  if(as.character(prob_by_lu$L1_code[i]) %in% names(lu_layers)) {
+    if(freq(lu_layers[[as.character(prob_by_lu$L1_code[i])]])[2, "count"]>5) { # ensure adequate representation (>5 pixels)
+    prob_by_lu$final_model_prob[i] <- mean(values(
+      mask(rec.model, 
+           lu_layers[[as.character(prob_by_lu$L1_code[i])]],
+           maskvalues=0), 
+      ), na.rm=TRUE)
+      
+    }
+  } else {
+    prob_by_lu$final_model_prob[i] <- NA
+  }
+}
+
+prob_by_lu_table <- prob_by_lu %>%
+  mutate(across(prob:final_model_prob,
+                ~round(.x, 2))) %>%
+  filter(!(Class == "0")) %>%
+  select(-L1_code) %>%
+  rename("Land Use" = "Class",
+         "Base Recreation Probability" = "prob",
+         "Avg Recreation Probability in Final Model" = "final_model_prob")
+write.csv(prob_by_lu_table, "../data/recreation/land_class_probabilities.csv",
+          row.names = FALSE)
+```
+
+```{r}
+#| label: "tbl-rec"
+
+prob_by_lu_table <- read_csv("../data/recreation/land_class_probabilities.csv")
+
+prob_by_lu_table$`Avg Recreation Probability in Final Model` <- 
+  as.character(prob_by_lu_table$`Avg Recreation Probability in Final Model`) %>%
+  replace_na("Low (\U2264 5km$^2$) representation at 1km scale")
+
+knitr::kable(prob_by_lu_table,
+             align="l")
+```
+
+```{r}
+#| label: "fig-rec"
+#| fig-width: 7.5
+#| fig-height: 3.5
+
+rec <- c(rast("../data/recreation/Hooftman_recreation_ensemble.tif"),
+         rast("../data/recreation/rec_prob.tif"))
+names(rec) <- c("RecProb_Hooftman", "RecProb_region")
+
+rec_df <- as.data.frame(rec, xy=TRUE)
+
+p1 <- ggplot(rec_df, aes(x=x, y=y, fill=RecProb_Hooftman)) +
+  geom_raster() +
+  scale_fill_viridis_c(name = "Probability of\nRecreation", na.value="white",
+                       limits=c(0,1)) +
+  labs(title="Recreation Probability",
+       subtitle = "Hooftman et al. (2023)",
+       tag = "a") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+p2 <- ggplot(rec_df, aes(x=x, y=y, fill=RecProb_region)) +
+  geom_raster() +
+  scale_fill_viridis_c(name = "Probability of\nRecreation", na.value="white",
+                       limits=c(0,1)) +
+  labs(title="Recreation Probability",
+       subtitle = "Regional Estimate",
+       tag = "b") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+
+p1+p2+plot_layout(ncol = 2, guides = 'collect')
+```
+

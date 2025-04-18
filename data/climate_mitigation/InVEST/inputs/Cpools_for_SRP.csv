@@ -1,0 +1,16 @@
+lucode,LULC_name,C_above,C_below,C_soil,C_dead
+11,Open Water,0,0,0,0
+21,Developed Areas; Open Space,18.86178862,4.338211382,86.5,0
+22,Developed Areas; Low,14.14634146,3.253658537,64.9,0
+23,Developed Areas; Med,9.430894309,2.169105691,43.3,0
+24,Developed Areas; High,0,0,0,0
+31,Barren lands,1,0.23,40.1,0
+41,Deciduous Forest ,75,17.25,71,28.2
+42,Evergreen Forest ,75,17.25,71,20.3
+43,Mixed Forest ,77,17.71,71,24.25
+52,Shrublands,5.95,2.125,73.25,0
+71,Grasslands,5.95,2.125,73.25,0
+81,Pasture/hay ,0,0,58.08,0
+82,Farmlands/Cultivated areas,0,0,58.08,0
+90,Woody Wetlands,6.15,6.15,88,0
+95,Water-Wetlands,3.8,3.8,88,0

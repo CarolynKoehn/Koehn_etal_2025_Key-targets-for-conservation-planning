@@ -1,0 +1,230 @@
+---
+title: "Water Quality NCP Models"
+author: "Carolyn Koehn"
+---
+
+```{r}
+#| label: setup
+
+library(sf)
+library(tidyverse)
+library(terra)
+library(patchwork, quietly = TRUE)
+
+pixel_size <- 1000
+epsg <- 5070
+
+aoi <- st_read("../data/study_area/boundary.shp", quiet=TRUE) %>%
+  st_transform(epsg)
+
+template_1km <- rast(aoi, resolution=pixel_size)
+template_100m <- rast(aoi, resolution=100)
+
+template_100m_buff <- rast(st_buffer(aoi, 20000), resolution=100)
+```
+
+The InVEST model needs (1) a hydrologically filled digital elevation model, (2) land use/land cover, (3) a nutrient runoff proxy, (4) watershed boundaries, and (5) a biophysical table.
+
+The DEM (WWF HydroSHEDS Hydrologically Conditioned DEM, 3 arc-second resolution) was accessed and cropped on Google Earth Engine.
+
+```{r}
+#| eval: false
+
+dem <- rast("../data/water_quality/raw_data/DEM_Filled_Buffered.tif")
+
+dem_proj <- project(dem, template_100m_buff)
+
+dem_999 <- dem_proj
+dem_999[dem_999==0] <- -9999
+
+writeRaster(dem_999,
+            "../data/water_quality/InVEST/inputs/DEM_Filled_Buffered.tif",
+            datatype = "INT4S",
+            overwrite=TRUE)
+```
+
+Land cover data from [AFT](https://csp-fut.appspot.com/) can be requested: https://survey123.arcgis.com/share/3f8d2e46cec64288b53d235fa7cf7d40
+
+```{r}
+#| eval: false
+
+# import land use
+lc <- rast("../data/land_cover_and_use_2016_CONUS_30m.tif")
+lc_proj <- project(lc, template_100m_buff, method="mode")
+
+# NLCD retrieved, projected, and cropped in Google Earth Engine
+nlcd <- rast("../data/NLCD_LandCover_Idaho_2016_reproj5070.tif")
+nlcd_proj <- project(nlcd, template_100m_buff, method = "mode")
+
+reclassify_FUT <- function(layerFUT,layerNLCD) {
+  new_layer <- layerFUT
+  #federal land to forest or rangeland
+  new_layer[(layerNLCD == 42 | layerNLCD == 41) & 
+              (new_layer == 8 | new_layer == 9)] <- 4
+  new_layer[(layerNLCD == 42 | layerNLCD == 41) & 
+              (new_layer == 1108 | new_layer == 1109)] <- 1104
+  new_layer[new_layer == 8 | new_layer == 9] <- 3
+  new_layer[new_layer == 1108 | new_layer == 1109] <- 1103
+  
+  return(new_layer)
+}
+
+lc_reclass <- reclassify_FUT(lc_proj, nlcd_proj)
+lc_reclass[is.na(lc_reclass)] <- 0
+
+writeRaster(lc_reclass,
+            "../data/water_quality/InVEST/inputs/land_cover_100m.tif",
+            datatype = "INT2U",
+            overwrite=TRUE)
+```
+
+Nutrient runoff proxy (total precipitation):
+
+```{r}
+#| eval: false
+
+precip <- geodata::worldclim_country("USA", var="prec", path=tempdir())
+annprec <- sum(precip, na.rm=TRUE)
+precip_clip <- project(annprec, template_100m_buff, method="sum")
+
+clim_999 <- precip_clip
+clim_999[clim_999<0] <- -9999
+clim_999[is.na(clim_999)] <- -9999
+
+writeRaster(clim_999,
+            "../data/water_quality/InVEST/inputs/worldclim_runoff_proxy.tif",
+            datatype="FLT4S")
+```
+
+Watershed boundaries accessed, cropped, and downloaded in Google Earth Engine (HUC12: USGS Watershed Boundary Dataset of Subwatersheds).
+
+Biophysical table created by calculating weighted averages of NLCD-specific parameters that reflect the NLCD classes present in the Farms Under Threat land cover data classes.
+
+```{r}
+#| eval: false
+
+source("get_weighted_params_functions.R")
+
+# Files needed:
+#  Data that needs weighted parameters
+data_without_params <- lc_reclass
+#  Data with known parameters for InVEST
+data_with_params <- nlcd_proj
+#  Known parameters for layer 2
+#    First column MUST be lucode (land use code)
+#    Second column MUST be LULC_name (land use class name)
+params_l2 <- read.csv("../data/water_quality/N_Biophys_Data_Huang.csv")
+#  Land class codes and corresponding land classes for each layer
+#    Codes and classes for layer 1
+classes_l1 <- data.frame(Code=c(1,2,3,4,5,6,7,10,12,1101,1102,1103,1104,1105,1106,1107,1110,1112),
+                          Class=c("Cropland", "Pastureland", "Rangeland", "Forestland", "Woodland", "Urban and highly developed areas", "Water", "Other areas", "Transportation", "Cropland within LDR", "Pastureland within LDR", "Rangeland within LDR", "Forestland within LDR", "Woodland within LDR", "UHD areas within LDR", "Water within LDR", "Other areas within LDR", "Transportation within LDR"))
+#    Codes and classes for layer 2
+classes_l2 <- data.frame(Code=c(0, 11, 12, 21, 22, 23, 24, 31, 41, 42, 43, 52, 71, 81, 82, 90, 95),
+                         Class=c("No Data", "Water", "Perennial Ice/Snow", "Developed, Open Space", "Developed, Low Intensity", "Developed, Med Intensity", "Developed, High Intensity", "Barren Land", "Deciduous Forest", "Evergreen Forest", "Mixed Forest", "Shrub/scrub", "Grassland", "Pasture/hay", "Cultivated Crops", "Woody Wetlands", "Emergent Herbaceous Wetlands"))
+#
+# Set options:
+cutoff <- 0.01  #[fraction] if a land class is present at a level under the cutoff, it will not be included in the parameter calculation and its land area will be distributed to other land use classes
+noDatacode_l2 <- 0
+writeTo <- "../data/water_quality/InVEST/inputs/01_Weighted_Nparams.csv"
+
+#################################################
+
+rastStack <- c(data_without_params,data_with_params)
+
+#get a comparison table from get_weighted_params_functions.R
+comp_table <- create_comparison_table(rasterStack = rastStack, labels1 = classes_l1, labels2 = classes_l2)
+
+#get weighted parameters from get_weighted_params_functions.R
+weighted_params <- get_weighted_params(comparison.table = comp_table,
+                                       known.params = params_l2,
+                                       code.col = "L1_code",
+                                       label.col = "Class",
+                                       noData.col = as.character(noDatacode_l2),
+                                       totalArea.col = "Total_Area",
+                                       filterBelow = cutoff)
+write_csv(weighted_params,writeTo)
+```
+
+The metadata from this InVEST model generation can be found in `/data/water_quality/InVEST`. The run log is `InVEST-natcap.invest.ndr.ndr-log-2024-11-01--13_57_47.txt`.
+
+Resample from watershed scale to 1km:
+
+```{r}
+#| eval: false
+
+ws_results <- st_read("../data/water_quality/InVEST/watershed_results_ndr.gpkg")
+
+ws_results.v <- vect(ws_results)
+
+ws_results.v$reten <- ws_results.v$n_surface_load - ws_results.v$n_total_export
+
+ws_results.v$reten_ratio <- ws_results.v$reten / ws_results.v$n_surface_load
+
+reten_ratio_ws_rast <- rasterize(ws_results.v, template_1km, field="reten_ratio", fun=max)
+reten_ratio_ws_rast <- mask(reten_ratio_ws_rast, aoi)
+
+writeRaster(reten_ratio_ws_rast, 
+            "../data/water_quality/watershed_retention-load_ratio.tif", 
+            datatype = "FLT4S",
+            overwrite=TRUE)
+```
+
+Nutrient contamination estimates from Ransom et al. (2021) -- https://doi.org/10.5066/P9IPKWFL
+
+```{r}
+#| eval: false
+
+n_estimates <- rast("../data/water_quality/raw_data/Ransom_et_al_nitrate_estimates/Outputs/published_pred_nitrate_rasters/no3_doms.asc")
+
+crs(n_estimates) <- 'PROJCS["USA_Contiguous_Albers_Equal_Area_Conic_USGS_version",GEOGCS["NAD83",DATUM["North_American_Datum_1983",SPHEROID["GRS 1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],AUTHORITY["EPSG","6269"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4269"]],PROJECTION["Albers_Conic_Equal_Area"],PARAMETER["latitude_of_center",23],PARAMETER["longitude_of_center",-96],PARAMETER["standard_parallel_1",29.5],PARAMETER["standard_parallel_2",45.5],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["ESRI","102039"]]'
+
+n_est_proj <- project(n_estimates, template_1km)
+n_est_proj_clip <- crop(n_est_proj, aoi, mask=TRUE)
+
+n_rank <- (n_est_proj_clip*-1) + max(values(n_est_proj_clip), na.rm=T)
+
+writeRaster(n_rank,
+            "../data/water_quality/watershed_nitrate_rank.tif",
+            datatype = "FLT4S",
+            overwrite=TRUE)
+```
+
+Plot:
+
+```{r}
+#| label: "fig-waterqual"
+#| fig-width: 8
+#| fig-height: 3
+
+watqual_rasts <- c(rast("../data/water_quality/watershed_retention-load_ratio.tif"),
+               rast("../data/water_quality/watershed_nitrate_rank.tif"))
+names(watqual_rasts) <- c("Retention", "Nitrates")
+
+watqual_df <- as.data.frame(watqual_rasts, xy=TRUE)
+
+p1 <- ggplot(watqual_df, aes(x=x, y=y, fill=Retention)) +
+  geom_raster() +
+  scale_fill_viridis_c(name = "% N\nRetained", na.value="white") +
+  labs(title="N Retention Capacity",
+       tag = "a") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+p2 <- ggplot(watqual_df, aes(x=x, y=y, fill=Nitrates)) +
+  geom_raster() +
+  scale_fill_viridis_c(name = "Nitrate\nLevel Rank", na.value="white") +
+  labs(title="Estimated Nitrates",
+       tag = "b") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+
+p1+p2
+```
+

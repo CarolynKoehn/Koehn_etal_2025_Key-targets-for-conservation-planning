@@ -1,0 +1,27 @@
+//import study area
+var study_area = ee.FeatureCollection("users/carolynkoehn/SRP_counties_26");
+
+//import data FOR 2021
+var cld = ee.ImageCollection("USDA/NASS/CDL")
+.filterBounds(study_area)
+.filterDate("2021");
+print(cld);
+print("Scale: ",cld.first().select('cropland').projection().nominalScale());
+
+//clip to study area
+var cld_clip = cld.first().clip(study_area).select("cropland");
+print(cld_clip);
+
+print("Export scale: ",cld_clip.projection().nominalScale());
+print("Image projection info: ",cld_clip.projection().getInfo());
+print("Export CRS: ",cld_clip.projection().crs());
+
+Export.image.toDrive({
+  image: cld_clip,
+  folder: "GEE Exports",
+  description: 'USDA_NASS_Cropland_SRPcounties',
+  scale: 30,
+  crs: "EPSG:5070",
+  maxPixels: 3e9,
+  region: study_area.geometry().bounds().getInfo()
+});

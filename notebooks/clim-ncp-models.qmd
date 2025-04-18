@@ -1,0 +1,343 @@
+---
+title: "Climate Models"
+author: "Carolyn Koehn"
+---
+
+```{r}
+#| label: "setup"
+
+library(sf)
+library(tidyverse)
+library(terra)
+library(patchwork, quietly = TRUE)
+library(ggnewscale)
+
+pixel_size <- 1000
+epsg <- 5070
+
+aoi <- st_read("../data/study_area/boundary.shp", quiet=TRUE) %>%
+  st_transform(epsg)
+
+template <- rast(aoi, resolution=pixel_size)
+template_30m <- rast(aoi, resolution=30)
+```
+
+## C Stock Protection
+
+Soil organic C stock, downloaded from www.doi.org/10.5281/zenodo.1475453.
+
+```{r}
+#| eval: false
+
+soc_files <- list.files(path = "../data/climate_mitigation/raw_data",
+                        pattern = "^sol_organic.carbon.stock")
+
+soc <- rast(paste0("../data/climate_mitigation/raw_data/", soc_files))
+soc_clip <- crop(soc, st_transform(aoi, crs(soc)))
+
+# data is ~250m resolution -> project to projected, exact 250m resolution
+soc_clip_proj <- project(soc_clip, rast(aoi, resolution=250), method="bilinear")
+# convert kg/m2 -> metric tons/pixel (px area=62,500m2)
+soc_clip_proj_tpx <- soc_clip_proj*62500*0.001
+
+# add soil depth layers, accounting for depth to bedrock
+depth_to_bedrock <- rast("/vsizip/../data/climate_mitigation/raw_data/BDRICM_M_250m_ll.zip/BDRICM_M_250m_ll.tif")
+depth_to_bedrock_proj <- project(depth_to_bedrock, soc_clip_proj_tpx)
+
+# these are conservative estimates, since they remove soil layers where any bedrock is present
+soc_all_layers <- ifel(depth_to_bedrock_proj==200, sum(soc_clip_proj_tpx),
+                       ifel(depth_to_bedrock_proj>100, sum(soc_clip_proj_tpx[[1:4]]),
+                            ifel(depth_to_bedrock_proj>60, sum(soc_clip_proj_tpx[[1:3]]),
+                                 ifel(depth_to_bedrock_proj>30, sum(soc_clip_proj_tpx[[1:2]]), NA))))
+
+# sum to 1km resolution
+soc_clip_proj_tkm2 <- project(soc_all_layers, template, method="sum")
+soc_clip_proj_tkm2 <- crop(soc_clip_proj_tkm2, aoi, mask=TRUE)
+
+writeRaster(soc_clip_proj_tkm2,
+            "../data/climate_mitigation/Hengl_soil_organic_C_estimates.tif",
+            datatype = "FLT4S",
+            overwrite=TRUE)
+```
+
+Above and belowground biomass C density, downloaded from https://doi.org/10.3334/ORNLDAAC/1763
+
+```{r}
+#| eval: false
+
+abv_c <- rast("/vsizip/../data/climate_mitigation/raw_data/biomass_carbon_2010.zip/aboveground_biomass_carbon_2010.tif")
+
+abv_c_clip <- project(abv_c, template)
+abv_c_clip <- crop(abv_c_clip, aoi, mask=TRUE)
+
+blw_c <- rast("/vsizip/../data/climate_mitigation/raw_data/biomass_carbon_2010.zip/belowground_biomass_carbon_2010.tif")
+
+blw_c_clip <- project(blw_c, template)
+blw_c_clip <- crop(blw_c_clip, aoi, mask=TRUE)
+
+tot_c_est1 <- abv_c_clip + blw_c_clip
+
+writeRaster(tot_c_est1,
+            "../data/climate_mitigation/Spawn_2010_carbon_storage_estimate.tif",
+            datatype = "FLT4S",
+            overwrite=TRUE)
+```
+
+InVEST model:
+
+- Land cover data from [AFT](https://csp-fut.appspot.com/) can be requested: https://survey123.arcgis.com/share/3f8d2e46cec64288b53d235fa7cf7d40
+- Nearest neighbor projection is used to improve processing speed as data is approximately at the 30m resolution of the template 
+
+```{r}
+#| eval: false
+
+lc <- rast("../data/land_cover_and_use_2016_CONUS_30m.tif")
+
+lc_clip <- crop(lc, st_transform(aoi, crs(lc)))
+lc_proj <- project(lc_clip, template_30m, method = "near")
+lc_clip <- crop(lc_proj, aoi, mask=TRUE)
+
+# NLCD retrieved, projected, and cropped in Google Earth Engine
+nlcd <- rast("../data/NLCD_LandCover_Idaho_2016_reproj5070.tif")
+# nlcd_clip <- terra::aggregate(nlcd, fact = (1000/30), fun = "modal")
+nlcd_proj <- project(nlcd, template_30m, method = "near")
+nlcd_clip <- crop(nlcd_proj, aoi, mask=TRUE)
+
+reclassify_FUT <- function(layerFUT,layerNLCD) {
+  new_layer <- layerFUT
+  #federal land to forest or rangeland
+  new_layer[(layerNLCD == 42 | layerNLCD == 41) & 
+              (new_layer == 8 | new_layer == 9)] <- 4
+  new_layer[(layerNLCD == 42 | layerNLCD == 41) & 
+              (new_layer == 1108 | new_layer == 1109)] <- 1104
+  new_layer[new_layer == 8 | new_layer == 9] <- 3
+  new_layer[new_layer == 1108 | new_layer == 1109] <- 1103
+  
+  return(new_layer)
+}
+
+lc_reclass <- reclassify_FUT(lc_clip, nlcd_clip)
+lc_reclass[is.na(lc_reclass)] <- 0
+
+writeRaster(lc_reclass,
+            "../data/AFT_land_cover_2016_5070_30m_clip_reclassify_NAis0.tif",
+            datatype = "INT2U",
+            overwrite=TRUE)
+
+# 1km resolution
+# lc_1km <- project(lc_reclass, template, method="mode")
+# 
+# writeRaster(lc_reclass,
+#             "../data/AFT_land_cover_2016_5070_1km_clip_reclassify_NAis0.tif",
+#             datatype = "INT2U",
+#             overwrite=TRUE)
+```
+
+Halperin et al. (2023) developed C parameters for Idaho for each land class present in the 2016 NLCD land classification product. This research uses 2016 American Farmland Trust land classification product. To apply Halperin et al.'s parameters to a source with different data classes, I use weighted averages of their parameters that reflect the NLCD classes present in each AFT class. All NLCD classes with <=1% representation in an AFT classes are eliminated and the 1% weight is distributed equally between all other classes.
+
+```{r}
+#| eval: false
+
+source("get_weighted_params_functions.R")
+
+nlcd <- nlcd_clip
+aft <- rast("../data/AFT_land_cover_2016_5070_30m_clip_reclassify_NAis0.tif")
+aft <- project(aft, template_30m, method="near")
+
+#Cpools parameters for NLCD classes
+cpools_nlcd <- read.csv("../data/climate_mitigation/InVEST/inputs/Cpools_for_SRP.csv")
+
+#create tables with land class codes and their corresponding class for each data source from metadata
+nlcd_classes <- data.frame(Code=unique(nlcd)[,1],
+                           Class=c("No Data","Water","Perennial Ice/Snow","Developed, Open Space","Developed, Low Intensity","Developed, Med Intensity","Developed, High Intensity","Barren Land","Deciduous Forest","Evergreen Forest","Mixed Forest","Shrub/scrub","Grassland","Pasture/hay","Cultivated Crops","Woody Wetlands","Emergent Herbaceous Wetlands"))
+aft_classes <- data.frame(Code=unique(aft)[,1],
+                          AFT_class=c("No Data","Cropland","Pastureland","Rangeland","Forestland","Woodland","Urban and highly developed areas","Water","Other areas","Transportation","Cropland within LDR","Pastureland within LDR","Rangeland within LDR","Forestland within LDR","Woodland within LDR","UHD areas within LDR","Water within LDR","Other areas within LDR","Transportation within LDR"))
+
+#check that rasters can overlap exactly -- if so, creates overlap
+if (crs(aft) == crs(nlcd) &
+    ext(aft) == ext(nlcd) &
+    origin(aft)[1] == origin(nlcd)[1] &
+    origin(aft)[2] == origin(nlcd)[2] &
+    res(aft)[1] == res(nlcd)[1] &
+    res(aft)[2] == res(nlcd)[2]) {
+  combo <- c(aft,nlcd)
+}
+
+#get a comparison table from get_weighted_params_functions.R
+comp_table <- create_comparison_table(rasterStack = combo, 
+                                      labels1 = aft_classes, 
+                                      labels2 = nlcd_classes)
+
+#get weighted parameters from get_weighted_params_functions.R
+weighted_params <- get_weighted_params(comparison.table = comp_table,
+                                       known.params = cpools_nlcd,
+                                       code.col = "L1_code",
+                                       label.col = "AFT_class",
+                                       noData.col = "0",
+                                       totalArea.col = "Total_Area",
+                                       filterBelow = 0.01)
+
+#add missing codes to make InVEST happy
+Cpools_table <- rbind(weighted_params[-1,],
+                      data.frame(lucode=0,
+                                 LULC_name="NaN",
+                                 C_above=0,C_below=0,
+                                 C_soil=0,C_dead=0))
+
+# some parameters are known but muddied in the weighting process above
+# they are manually changed here
+Cpools_table <- Cpools_table %>%
+  mutate(across(C_above:C_dead, 
+                ~ifelse(LULC_name == "Water", 0, .x))) %>%
+  mutate(across(c(C_above:C_below, C_dead), 
+                ~ifelse(str_detect(LULC_name, "Cropland"), 0, .x)))
+
+write.csv(Cpools_table,
+          "../data/climate_mitigation/InVEST/inputs/01_Weighted_Cpools_AFT.csv",
+          row.names=FALSE)
+```
+
+The metadata from this InVEST model generation can be found in `/data/climate_mitigation/InVEST`. The model inputs are in `report.html`, the run log is `InVEST-natcap.invest.carbon-log-2024-11-08--15_05_06.txt`, and the model output is `tot_c_cur.tif`.
+
+Resample to 1km:
+
+```{r}
+#| eval: false
+
+tot_c_cur <- rast("../data/climate_mitigation/InVEST/tot_c_cur.tif")
+
+tot_c_cur_clip <- project(tot_c_cur, template, method = "sum")
+tot_c_cur_clip <- crop(tot_c_cur_clip, aoi, mask=TRUE)
+
+writeRaster(tot_c_cur_clip,
+            "../data/climate_mitigation/InVEST/tot_c_cur_1km.tif",
+            datatype = "FLT4S",
+            overwrite = TRUE)
+```
+
+## Climate Adaptation
+
+Climate accessibility, downloaded Multivariate PCA data for the 2050s from https://sites.ualberta.ca/~ahamann/data/velocitywna.html
+
+```{r}
+#| eval: false
+
+clim_v <- rast("/vsizip/../data/climate_mitigation/raw_data/PCA_Forward_Ensemble_A1B_2050s.zip/AvgVelocity_A1B_2050s.asc")
+
+clim_v_clip <- project(clim_v, template)
+clim_v_clip <- crop(clim_v_clip, aoi, mask=TRUE)
+clim_acc <- -1*clim_v_clip
+clim_acc_pos <- clim_acc - min(clim_acc[], na.rm=TRUE)
+
+writeRaster(clim_acc_pos,
+            "../data/climate_mitigation/Hamann_2014_climate_accessibility.tif",
+            datatype = "FLT4S",
+            overwrite=TRUE)
+```
+
+Climate stability, downloaded Absolute climate dissimilarity from https://adaptwest.databasin.org/pages/climatic-dissimilarity/
+
+```{r}
+#| eval: false
+
+clim_dis <- rast("../data/climate_mitigation/raw_data/climdissim_ensemble_85_2055laz.tif")
+
+clim_dis_clip <- project(clim_dis, template)
+clim_dis_clip <- crop(clim_dis_clip, aoi, mask=TRUE)
+clim_stab <- -1*clim_dis_clip+1
+
+writeRaster(clim_stab,
+            "../data/climate_mitigation/Carroll_2018_climate_stability.tif",
+            datatype = "FLT4S",
+            overwrite = TRUE)
+```
+
+```{r}
+#| label: fig-clim-mit
+#| fig-width: 8
+
+climate_rasts <- c(rast("../data/climate_mitigation/Hengl_soil_organic_C_estimates.tif"),
+                   rast("../data/climate_mitigation/Spawn_2010_carbon_storage_estimate.tif"),
+                   rast("../data/climate_mitigation/Hamann_2014_climate_accessibility.tif"),
+                   rast("../data/climate_mitigation/Carroll_2018_climate_stability.tif"),
+                   rast("../data/climate_mitigation/InVEST/tot_c_cur_1km.tif"))
+names(climate_rasts) <- c("SOC", "CStorage", "ClimAcc", "ClimStability", "InVEST")
+
+clim_df <- as.data.frame(climate_rasts, xy=TRUE) %>%
+  mutate(InVEST = ifelse(InVEST == 0, NA, InVEST))
+
+p1 <- ggplot() +
+  geom_raster(data=subset(clim_df, SOC<=50000), aes(x=x, y=y, fill=SOC)) +
+  scale_fill_viridis_c(name = "MgC/km2", na.value="black", limits=c(0,50000)) +
+  new_scale_fill() +
+  geom_raster(data=subset(clim_df, SOC>50000), aes(x=x, y=y, fill="coral"), inherit.aes = F) +
+  scale_fill_discrete(name = "Outliers", label="50,000-291,000\nMgC/km2") +
+  labs(title="Soil Organic C Stock",
+       subtitle = "0-200cm depth",
+       tag = "c") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+p2 <- ggplot(clim_df, aes(x=x, y=y, fill=CStorage)) +
+  geom_raster() +
+  scale_fill_viridis_c(name = "MgC/ha", na.value="white") +
+  labs(title="C Storage",
+       subtitle = "Global scale",
+       tag = "b") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+p3 <- ggplot(clim_df, aes(x=x, y=y, fill=ClimAcc)) +
+  geom_raster() +
+  scale_fill_viridis_c(name = "Inverse climate\nvelocity (unitless)", na.value="white") +
+  labs(title="Climate Accessibility",
+       tag = "a") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+p4 <- ggplot(clim_df, aes(x=x, y=y, fill=ClimStability)) +
+  geom_raster() +
+  scale_fill_viridis_c(name = "Inverse climate\ndissimilarity\n(unitless)", na.value="white") +
+  labs(title="Climate Stability",
+       tag = "b") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+p5 <- ggplot(clim_df, aes(x=x, y=y, fill=InVEST)) +
+  geom_raster() +
+  scale_fill_viridis_c(name = "MgC/km2", na.value="white") +
+  labs(title="C Storage",
+       subtitle="Regional scale",
+       tag = "a") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+
+#p5+p2+p3+p4+p1 + plot_layout(ncol = 2)
+
+p5+p2+p1 + plot_layout(ncol = 2)
+```
+
+```{r}
+#| label: fig-clim-adap
+#| fig-width: 8
+#| fig-height: 3
+
+p3+p4 + plot_layout(ncol = 2)
+```
+

@@ -1,0 +1,299 @@
+2024-11-01 13:57:47,937 (natcap.invest.utils) utils.prepare_workspace(161) Level 100 Writing log messages to [C:\Users\carolynkoehn\Documents\Chapter_1\FarmPrES-regional-SCP\data\water_quality\InVEST\InVEST-natcap.invest.ndr.ndr-log-2024-11-01--13_57_47.txt]
+2024-11-01 13:57:47,937 (__main__) cli.main(475) Level 100 Starting model with parameters: 
+Arguments for InVEST natcap.invest.ndr.ndr 3.12.0:
+biophysical_table_path       C:\Users\carolynkoehn\Documents\Chapter_1\FarmPrES-regional-SCP\data\water_quality\InVEST\inputs\01_Weighted_Nparams.csv
+calc_n                       True
+calc_p                       False
+dem_path                     C:\Users\carolynkoehn\Documents\Chapter_1\FarmPrES-regional-SCP\data\water_quality\InVEST\inputs\DEM_Filled_Buffered.tif
+k_param                      2
+lulc_path                    C:\Users\carolynkoehn\Documents\Chapter_1\FarmPrES-regional-SCP\data\water_quality\InVEST\inputs\land_cover_100m.tif
+n_workers                    -1
+results_suffix               
+runoff_proxy_path            C:\Users\carolynkoehn\Documents\Chapter_1\FarmPrES-regional-SCP\data\water_quality\InVEST\inputs\worldclim_runoff_proxy.tif
+subsurface_critical_length_n 0
+subsurface_eff_n             0
+threshold_flow_accumulation  400
+watersheds_path              C:\Users\carolynkoehn\Documents\Chapter_1\FarmPrES-regional-SCP\data\water_quality\InVEST\inputs\HUC12_watersheds_SRP_5070.shp
+workspace_dir                C:\Users\carolynkoehn\Documents\Chapter_1\FarmPrES-regional-SCP\data\water_quality\InVEST
+
+2024-11-01 13:57:50,632 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:57:50,633 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-1 (stats_worker), started daemon 13608)>
+2024-11-01 13:57:51,007 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:57:51,007 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:57:51,645 (pygeoprocessing.geoprocessing) geoprocessing.align_and_resize_raster_stack(824) INFO 1 of 3 aligned: aligned_dem.tif
+2024-11-01 13:57:53,373 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:57:53,374 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-2 (stats_worker), started daemon 16192)>
+2024-11-01 13:57:53,611 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:57:53,611 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:57:53,826 (pygeoprocessing.geoprocessing) geoprocessing.align_and_resize_raster_stack(824) INFO 2 of 3 aligned: aligned_lulc.tif
+2024-11-01 13:57:56,718 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:57:56,719 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-3 (stats_worker), started daemon 9648)>
+2024-11-01 13:57:57,182 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:57:57,182 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:57:57,817 (pygeoprocessing.geoprocessing) geoprocessing.align_and_resize_raster_stack(824) INFO 3 of 3 aligned: aligned_runoff_proxy.tif
+2024-11-01 13:57:57,817 (pygeoprocessing.geoprocessing) geoprocessing.align_and_resize_raster_stack(828) INFO aligned all 3 rasters.
+2024-11-01 13:58:03,960 (pygeoprocessing.routing.routing) Task._call(1093) INFO (fill pits): complete
+2024-11-01 13:58:12,129 (pygeoprocessing.routing.routing) Task._call(1093) INFO 100.0% complete
+2024-11-01 13:58:22,344 (pygeoprocessing.routing.routing) Task._call(1093) INFO 100.0% complete
+2024-11-01 13:58:26,482 (pygeoprocessing.routing.routing) Task._call(1093) INFO filter out incomplete divergent streams
+2024-11-01 13:58:26,617 (pygeoprocessing.routing.routing) Task._call(1093) INFO 100.0% complete
+2024-11-01 13:58:27,909 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:58:27,910 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-4 (stats_worker), started daemon 11376)>
+2024-11-01 13:58:28,411 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:58:28,411 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:58:29,542 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:58:29,543 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-5 (stats_worker), started daemon 8996)>
+2024-11-01 13:58:30,194 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:58:30,195 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:58:41,006 (pygeoprocessing.routing.routing) Task._call(1093) INFO mfd flow accum 49.4% complete
+2024-11-01 13:58:41,773 (pygeoprocessing.routing.routing) Task._call(1093) INFO 100.0% complete
+2024-11-01 13:58:41,805 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:58:41,806 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-6 (stats_worker), started daemon 12676)>
+2024-11-01 13:58:43,359 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:58:43,359 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:58:44,076 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:58:44,077 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-7 (stats_worker), started daemon 11260)>
+2024-11-01 13:58:45,294 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:58:45,294 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:58:46,009 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:58:46,010 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-8 (stats_worker), started daemon 1548)>
+2024-11-01 13:58:46,477 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:58:46,477 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:58:54,984 (pygeoprocessing.routing.routing) Task._call(1093) INFO 100.0% complete
+2024-11-01 13:59:01,985 (pygeoprocessing.routing.routing) Task._call(1093) INFO 100.0% complete
+2024-11-01 13:59:02,030 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:59:02,031 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-9 (stats_worker), started daemon 9668)>
+2024-11-01 13:59:03,007 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:59:03,008 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:59:03,114 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:59:03,115 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-10 (stats_worker), started daemon 7020)>
+2024-11-01 13:59:04,385 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:59:04,386 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:59:05,044 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:59:05,044 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-11 (stats_worker), started daemon 13424)>
+2024-11-01 13:59:05,475 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:59:05,475 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:59:05,827 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:59:05,828 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-12 (stats_worker), started daemon 14832)>
+2024-11-01 13:59:06,758 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:59:06,758 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:59:07,409 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:59:07,410 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-13 (stats_worker), started daemon 11364)>
+2024-11-01 13:59:07,975 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:59:07,976 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:59:08,624 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:59:08,624 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-14 (stats_worker), started daemon 12832)>
+2024-11-01 13:59:08,992 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:59:08,992 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:59:09,359 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:59:09,360 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-15 (stats_worker), started daemon 10236)>
+2024-11-01 13:59:09,771 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:59:09,771 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:59:10,101 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:59:10,102 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-16 (stats_worker), started daemon 1332)>
+2024-11-01 13:59:11,190 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:59:11,190 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:59:21,973 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:59:21,973 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-17 (stats_worker), started daemon 14272)>
+2024-11-01 13:59:22,762 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:59:22,762 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:59:23,384 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:59:23,385 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-18 (stats_worker), started daemon 13048)>
+2024-11-01 13:59:24,092 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:59:24,092 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:59:24,718 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:59:24,719 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-19 (stats_worker), started daemon 6732)>
+2024-11-01 13:59:25,303 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:59:25,303 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:59:25,578 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:59:25,579 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-20 (stats_worker), started daemon 1488)>
+2024-11-01 13:59:25,587 (py.warnings) warnings._showwarnmsg(109) WARNING natcap\invest\ndr\ndr.py:1330: RuntimeWarning: divide by zero encountered in divide
+
+2024-11-01 13:59:25,587 (py.warnings) warnings._showwarnmsg(109) WARNING natcap\invest\ndr\ndr.py:1330: RuntimeWarning: invalid value encountered in divide
+
+2024-11-01 13:59:26,412 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:59:26,413 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:59:26,758 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:59:26,758 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-21 (stats_worker), started daemon 11168)>
+2024-11-01 13:59:27,478 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:59:27,478 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:59:27,791 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(396) INFO starting stats_worker
+2024-11-01 13:59:27,791 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(402) INFO started stats_worker <Thread(Thread-22 (stats_worker), started daemon 12112)>
+2024-11-01 13:59:28,731 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(482) INFO 100.0% complete
+2024-11-01 13:59:28,732 (pygeoprocessing.geoprocessing) geoprocessing.raster_calculator(485) INFO Waiting for raster stats worker result.
+2024-11-01 13:59:30,203 (pygeoprocessing.geoprocessing) geoprocessing.align_and_resize_raster_stack(824) INFO 1 of 1 aligned: clipped_raster.tif
+2024-11-01 13:59:30,203 (pygeoprocessing.geoprocessing) geoprocessing.align_and_resize_raster_stack(828) INFO aligned all 1 rasters.
+2024-11-01 13:59:30,214 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1275) INFO build a lookup of aggregate field value to FID
+2024-11-01 13:59:30,309 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1282) INFO creating disjoint polygon set
+2024-11-01 13:59:30,313 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2258) INFO build shapely polygon list
+2024-11-01 13:59:30,453 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2283) INFO build shapely rtree index
+2024-11-01 13:59:30,548 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2296) INFO poly feature lookup 100.0% complete on watershed_results_ndr.gpkg
+2024-11-01 13:59:30,549 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2300) INFO build poly intersection lookup
+2024-11-01 13:59:31,695 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2322) INFO poly intersection feature lookup 100.0% complete on watershed_results_ndr.gpkg
+2024-11-01 13:59:31,700 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2356) INFO maximal subset build 100.0% complete on watershed_results_ndr.gpkg
+2024-11-01 13:59:31,730 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1303) INFO processing 7 disjoint polygon sets
+2024-11-01 13:59:31,785 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 1 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:31,826 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 1 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:32,345 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 1 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:32,764 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 2 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:32,776 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 2 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:33,284 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 2 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:33,532 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 3 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:33,543 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 3 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:34,035 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 3 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:34,278 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 4 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:34,287 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 4 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:34,730 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 4 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:34,900 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 5 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:34,911 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 5 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:35,305 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 5 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:35,435 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 6 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:35,446 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 6 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:35,810 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 6 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:35,930 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 7 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:35,941 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 7 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:36,255 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 7 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:36,315 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1500) INFO all done processing polygon sets for watershed_results_ndr.gpkg
+2024-11-01 13:59:37,640 (pygeoprocessing.geoprocessing) geoprocessing.align_and_resize_raster_stack(824) INFO 1 of 1 aligned: clipped_raster.tif
+2024-11-01 13:59:37,640 (pygeoprocessing.geoprocessing) geoprocessing.align_and_resize_raster_stack(828) INFO aligned all 1 rasters.
+2024-11-01 13:59:37,645 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1275) INFO build a lookup of aggregate field value to FID
+2024-11-01 13:59:37,683 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1282) INFO creating disjoint polygon set
+2024-11-01 13:59:37,688 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2258) INFO build shapely polygon list
+2024-11-01 13:59:37,831 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2283) INFO build shapely rtree index
+2024-11-01 13:59:37,916 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2296) INFO poly feature lookup 100.0% complete on watershed_results_ndr.gpkg
+2024-11-01 13:59:37,916 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2300) INFO build poly intersection lookup
+2024-11-01 13:59:39,078 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2322) INFO poly intersection feature lookup 100.0% complete on watershed_results_ndr.gpkg
+2024-11-01 13:59:39,082 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2356) INFO maximal subset build 100.0% complete on watershed_results_ndr.gpkg
+2024-11-01 13:59:39,113 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1303) INFO processing 7 disjoint polygon sets
+2024-11-01 13:59:39,164 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 1 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:39,209 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 1 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:39,716 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 1 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:40,156 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 2 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:40,163 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 2 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:40,663 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 2 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:40,863 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 3 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:40,873 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 3 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:41,349 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 3 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:41,517 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 4 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:41,528 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 4 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:41,966 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 4 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:42,105 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 5 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:42,114 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 5 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:42,516 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 5 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:42,658 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 6 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:42,666 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 6 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:43,019 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 6 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:43,101 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 7 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:43,112 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 7 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:43,425 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 7 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:43,484 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1500) INFO all done processing polygon sets for watershed_results_ndr.gpkg
+2024-11-01 13:59:44,350 (pygeoprocessing.geoprocessing) geoprocessing.align_and_resize_raster_stack(824) INFO 1 of 1 aligned: clipped_raster.tif
+2024-11-01 13:59:44,350 (pygeoprocessing.geoprocessing) geoprocessing.align_and_resize_raster_stack(828) INFO aligned all 1 rasters.
+2024-11-01 13:59:44,354 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1275) INFO build a lookup of aggregate field value to FID
+2024-11-01 13:59:44,395 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1282) INFO creating disjoint polygon set
+2024-11-01 13:59:44,399 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2258) INFO build shapely polygon list
+2024-11-01 13:59:44,541 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2283) INFO build shapely rtree index
+2024-11-01 13:59:44,631 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2296) INFO poly feature lookup 100.0% complete on watershed_results_ndr.gpkg
+2024-11-01 13:59:44,631 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2300) INFO build poly intersection lookup
+2024-11-01 13:59:45,823 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2322) INFO poly intersection feature lookup 100.0% complete on watershed_results_ndr.gpkg
+2024-11-01 13:59:45,828 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2356) INFO maximal subset build 100.0% complete on watershed_results_ndr.gpkg
+2024-11-01 13:59:45,860 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1303) INFO processing 7 disjoint polygon sets
+2024-11-01 13:59:45,911 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 1 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:45,960 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 1 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:46,473 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 1 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:46,777 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 2 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:46,786 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 2 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:47,285 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 2 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:47,486 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 3 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:47,496 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 3 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:47,974 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 3 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:48,146 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 4 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:48,156 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 4 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:48,594 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 4 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:48,739 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 5 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:48,747 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 5 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:49,153 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 5 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:49,298 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 6 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:49,309 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 6 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:49,663 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 6 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:49,746 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 7 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:49,760 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 7 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:50,108 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 7 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:50,169 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1500) INFO all done processing polygon sets for watershed_results_ndr.gpkg
+2024-11-01 13:59:51,493 (pygeoprocessing.geoprocessing) geoprocessing.align_and_resize_raster_stack(824) INFO 1 of 1 aligned: clipped_raster.tif
+2024-11-01 13:59:51,493 (pygeoprocessing.geoprocessing) geoprocessing.align_and_resize_raster_stack(828) INFO aligned all 1 rasters.
+2024-11-01 13:59:51,498 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1275) INFO build a lookup of aggregate field value to FID
+2024-11-01 13:59:51,538 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1282) INFO creating disjoint polygon set
+2024-11-01 13:59:51,543 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2258) INFO build shapely polygon list
+2024-11-01 13:59:51,681 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2283) INFO build shapely rtree index
+2024-11-01 13:59:51,765 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2296) INFO poly feature lookup 100.0% complete on watershed_results_ndr.gpkg
+2024-11-01 13:59:51,765 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2300) INFO build poly intersection lookup
+2024-11-01 13:59:52,940 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2322) INFO poly intersection feature lookup 100.0% complete on watershed_results_ndr.gpkg
+2024-11-01 13:59:52,946 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2356) INFO maximal subset build 100.0% complete on watershed_results_ndr.gpkg
+2024-11-01 13:59:52,979 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1303) INFO processing 7 disjoint polygon sets
+2024-11-01 13:59:53,031 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 1 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:53,076 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 1 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:53,592 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 1 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:54,135 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 2 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:54,151 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 2 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:54,725 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 2 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:55,019 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 3 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:55,041 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 3 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:55,660 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 3 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:55,997 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 4 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:56,018 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 4 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:56,597 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 4 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:56,782 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 5 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:56,794 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 5 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:57,227 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 5 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:57,370 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 6 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:57,387 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 6 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:57,769 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 6 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:57,866 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 7 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 13:59:57,880 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 7 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:58,212 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 7 of 7 watershed_results_ndr.gpkg
+2024-11-01 13:59:58,280 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1500) INFO all done processing polygon sets for watershed_results_ndr.gpkg
+2024-11-01 13:59:59,666 (pygeoprocessing.geoprocessing) geoprocessing.align_and_resize_raster_stack(824) INFO 1 of 1 aligned: clipped_raster.tif
+2024-11-01 13:59:59,666 (pygeoprocessing.geoprocessing) geoprocessing.align_and_resize_raster_stack(828) INFO aligned all 1 rasters.
+2024-11-01 13:59:59,672 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1275) INFO build a lookup of aggregate field value to FID
+2024-11-01 13:59:59,718 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1282) INFO creating disjoint polygon set
+2024-11-01 13:59:59,723 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2258) INFO build shapely polygon list
+2024-11-01 13:59:59,873 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2283) INFO build shapely rtree index
+2024-11-01 13:59:59,958 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2296) INFO poly feature lookup 100.0% complete on watershed_results_ndr.gpkg
+2024-11-01 13:59:59,958 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2300) INFO build poly intersection lookup
+2024-11-01 14:00:01,258 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2322) INFO poly intersection feature lookup 100.0% complete on watershed_results_ndr.gpkg
+2024-11-01 14:00:01,263 (pygeoprocessing.geoprocessing) geoprocessing.calculate_disjoint_polygon_set(2356) INFO maximal subset build 100.0% complete on watershed_results_ndr.gpkg
+2024-11-01 14:00:01,293 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1303) INFO processing 7 disjoint polygon sets
+2024-11-01 14:00:01,345 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 1 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 14:00:01,398 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 1 of 7 watershed_results_ndr.gpkg
+2024-11-01 14:00:01,970 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 1 of 7 watershed_results_ndr.gpkg
+2024-11-01 14:00:02,480 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 2 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 14:00:02,494 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 2 of 7 watershed_results_ndr.gpkg
+2024-11-01 14:00:03,047 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 2 of 7 watershed_results_ndr.gpkg
+2024-11-01 14:00:03,283 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 3 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 14:00:03,295 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 3 of 7 watershed_results_ndr.gpkg
+2024-11-01 14:00:03,815 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 3 of 7 watershed_results_ndr.gpkg
+2024-11-01 14:00:04,029 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 4 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 14:00:04,047 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 4 of 7 watershed_results_ndr.gpkg
+2024-11-01 14:00:04,538 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 4 of 7 watershed_results_ndr.gpkg
+2024-11-01 14:00:04,701 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 5 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 14:00:04,716 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 5 of 7 watershed_results_ndr.gpkg
+2024-11-01 14:00:05,163 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 5 of 7 watershed_results_ndr.gpkg
+2024-11-01 14:00:05,359 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 6 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 14:00:05,373 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 6 of 7 watershed_results_ndr.gpkg
+2024-11-01 14:00:05,759 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 6 of 7 watershed_results_ndr.gpkg
+2024-11-01 14:00:05,848 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1337) INFO disjoint polygon set 7 of 7 100.0% processed on watershed_results_ndr.gpkg
+2024-11-01 14:00:05,860 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1345) INFO rasterizing disjoint polygon set 7 of 7 watershed_results_ndr.gpkg
+2024-11-01 14:00:06,193 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1363) INFO summarizing rasterized disjoint polygon set 7 of 7 watershed_results_ndr.gpkg
+2024-11-01 14:00:06,263 (pygeoprocessing.geoprocessing) geoprocessing.zonal_statistics(1500) INFO all done processing polygon sets for watershed_results_ndr.gpkg
+2024-11-01 14:00:06,315 (natcap.invest.ndr.ndr) ndr.execute(732) INFO Writing summaries to output shapefile
+2024-11-01 14:00:09,893 (natcap.invest.ndr.ndr) ndr.execute(736) INFO NDR complete!
+2024-11-01 14:00:09,893 (natcap.invest.ndr.ndr) ndr.execute(737) INFO   _   _    ____    ____     
+2024-11-01 14:00:09,893 (natcap.invest.ndr.ndr) ndr.execute(738) INFO  | \ |"|  |  _"\U |  _"\ u  
+2024-11-01 14:00:09,894 (natcap.invest.ndr.ndr) ndr.execute(739) INFO <|  \| |>/| | | |\| |_) |/  
+2024-11-01 14:00:09,894 (natcap.invest.ndr.ndr) ndr.execute(740) INFO U| |\  |uU| |_| |\|  _ <    
+2024-11-01 14:00:09,894 (natcap.invest.ndr.ndr) ndr.execute(741) INFO  |_| \_|  |____/ u|_| \_\   
+2024-11-01 14:00:09,894 (natcap.invest.ndr.ndr) ndr.execute(742) INFO  ||   \\,-.|||_   //   \\_  
+2024-11-01 14:00:09,894 (natcap.invest.ndr.ndr) ndr.execute(743) INFO  (_")  (_/(__)_) (__)  (__) 
+2024-11-01 14:00:09,894 (natcap.invest.utils) utils.prepare_workspace(169) INFO Elapsed time: 2m 21.960000000000008s
+2024-11-01 14:00:09,894 (natcap.invest.utils) utils.prepare_workspace(172) INFO Execution finished

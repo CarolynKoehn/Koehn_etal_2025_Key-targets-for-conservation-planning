@@ -1,0 +1,18 @@
+"Land Use","Base Recreation Probability","Avg Recreation Probability in Final Model"
+"Cropland",0.01,0.04
+"Pastureland",0.02,0.07
+"Rangeland",0.13,0.2
+"Forestland",0.18,0.28
+"Woodland",0.01,NA
+"Urban and highly developed areas",0.06,0.11
+"Water",0.11,0.14
+"Other areas",0.08,0.09
+"Transportation",0.57,NA
+"Cropland within LDR",0.02,0.04
+"Pastureland within LDR",0.02,0.04
+"Rangeland within LDR",0.07,0.16
+"Forestland within LDR",0.11,0.18
+"UHD areas within LDR",0.04,0.08
+"Water within LDR",0.16,NA
+"Other areas within LDR",0.04,0.09
+"Transportation within LDR",0.5,NA

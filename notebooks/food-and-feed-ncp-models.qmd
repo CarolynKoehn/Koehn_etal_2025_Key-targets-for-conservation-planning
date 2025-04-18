@@ -1,0 +1,342 @@
+---
+title: "Food and Feed NCP Models"
+author: "Carolyn Koehn"
+---
+
+```{r}
+#| label: setup
+
+library(sf)
+library(tidyverse)
+library(terra)
+library(patchwork, quietly = TRUE)
+
+pixel_size <- 1000
+epsg <- 5070
+
+aoi <- st_read("../data/study_area/boundary.shp", quiet=TRUE) %>%
+  st_transform(epsg)
+
+template_1km <- rast(aoi, resolution=pixel_size)
+template_30m <- rast(aoi, resolution=30)
+```
+
+USDA NASS Cropland data layers were accessed and cropped in Google Earth Engine (code can be found in `/data/food_and_feed/USDA-NASS-CDL_GEE_code.txt`). Nearest neighbor projection is used for faster processing since the resolution remains relatively unchanged.
+
+```{r}
+#| eval: false
+
+cdl_files <- list.files("../data/food_and_feed/raw_data", 
+                        pattern = "USDA_NASS_Cropland",
+                        full.names = TRUE)
+cdl <- rast(cdl_files)
+cdl <- project(cdl, template_30m, method="near")
+```
+
+Mask to agricultural lands. Nearest neighbor projection is used for faster processing of the land cover data since the resolution remains relatively unchanged.
+
+Land cover data from [AFT](https://csp-fut.appspot.com/) can be requested: https://survey123.arcgis.com/share/3f8d2e46cec64288b53d235fa7cf7d40
+
+```{r}
+#| eval: false
+
+# import land use
+lc <- rast("../data/land_cover_and_use_2016_CONUS_30m.tif")
+lc_clip <- crop(lc, st_transform(aoi, crs(lc)))
+lc_proj <- project(lc_clip, template_30m, method="near")
+
+
+# mask to land that typically produce food
+food_classes <- c(1,1101,2,1102,3,1103,9,1109)
+food_mask <- lc_proj
+food_mask[food_mask %in% food_classes] <- 1
+food_mask[food_mask>1] <- NA
+food_mask <- mask(food_mask, aoi)
+
+# apply mask to cropscapes
+cdl <- lapply(cdl, function(x) {
+  return(terra::mask(x,food_mask))
+})
+
+cdl <- rast(cdl)
+names(cdl) <- seq(2016,2020,1)
+```
+
+Check data coverage:
+
+```{r}
+#| eval: false
+
+#check how much cropland is covered by Idaho Statistical Bulletin
+yield <- read.csv("../data/food_and_feed/2016-20_Yield.csv")
+crops_known <- subset(yield, yield$Yield_units != "")$Value
+perc_covered <- c(0,0,0,0,0)
+for(i in 1:5) {
+  ftab <- freq(cdl[[i]])
+  perc_covered[i] <- round((sum(ftab[ftab$value %in% crops_known,'count'])/sum(freq(cdl[[i]])$count))*100,0)
+}
+perc_covered
+#88-89% of agricultural land is described by Idaho Statistical Bulletin and rangelands.app data in all years
+```
+
+Create tables to match approximate crop yields to pixels:
+
+```{r}
+#| eval: false
+
+# create two tables: crop yield (lb/pixel) and pasture yield (AUM/pixel)
+# pixel:30m = 900m2, acre to pixel: 0.2223948433 acre in 900 m2
+# bushel conversion rates from www.agric.gov.ab.ca/app19/calc/crop/bushel2tonne.jsp
+
+crop_yield <- data.frame(value=yield$Value,
+                         TonPixel_2016=NA,
+                         TonPixel_2017=NA,
+                         TonPixel_2018=NA,
+                         TonPixel_2019=NA,
+                         TonPixel_2020=NA)
+
+for(yr in 3:7) { # large if-else loop for each year in yield data
+  new_yr <- yr-1
+  for(i in 1:nrow(crop_yield)) { # for every row in the new data
+    # if yield is 0 or NA
+    if(yield[i, yr] == 0 | is.na(yield[i, yr])) {
+      crop_yield[i, new_yr] <- NA
+    # if units = tons, acres to m2 conversion
+    } else if(yield[i, "Yield_units"] == "tons") {
+      crop_yield[i, new_yr] <- yield[i, yr]*(0.2223948433)
+    # if units = pounds, acres-m2 and pounds-tons conversion
+    } else if(yield[i, "Yield_units"] == "pounds") {
+      crop_yield[i, new_yr] <- (yield[i, yr]/2000)*0.2223948433
+    # if units = cwt, acres-m2 and cwt-tons conversion
+    } else if(yield[i, "Yield_units"] == "cwt") {
+      crop_yield[i, new_yr] <- (yield[i, yr]*100/2000)*(0.2223948433)
+    # if units = bushels, specific conversions for each crop
+    } else if(yield$Value[i] == 21 & yield[i, "Yield_units"] == "bushels") { #barley
+      crop_yield[i, new_yr] <- (yield[i, yr]/45.93)*(0.2223948433)
+    } else if(yield$Value[i] %in% c(22,23,24) & yield[i, "Yield_units"] == "bushels") { #wheat
+      crop_yield[i, new_yr] <- (yield[i, yr]/36.744)*(0.2223948433)
+    } else if(yield$Value[i] == 28 & yield[i, "Yield_units"] == "bushels") { #oats
+      crop_yield[i, new_yr] <- (yield[i, yr]/64.842)*(0.2223948433)
+    } else if(yield$Value[i] == 225) {#double winter wheat and corn -- take winter wheat only since corn is feed crop
+      crop_yield[i, new_yr] <- crop_yield[which(crop_yield$value == 24), new_yr]
+    # double barley/corn -- take barley only
+    } else if(yield$Value[i] == 237) {
+      crop_yield[i, new_yr] <- crop_yield[which(crop_yield$value == 21), new_yr]
+    }
+    
+    if(yield$Value[i] %in% c(1,36,37,152,176)) {#do not include animal feed crops
+      crop_yield[i, new_yr] <- NA
+    }
+  }
+}
+
+
+write.csv(crop_yield,
+          "../data/food_and_feed/CropYield_2016-20.csv",
+          row.names = FALSE)
+
+pasture_yield <- data.frame(value=yield$Value,
+                            AUMPixel_2016=NA,
+                            AUMPixel_2017=NA,
+                            AUMPixel_2018=NA,
+                            AUMPixel_2019=NA,
+                            AUMPixel_2020=NA)
+
+for(yr in 3:7) { # large if-else loop for each year in yield data
+  new_yr <- yr-1
+  
+  for(i in 1:nrow(pasture_yield)) {
+    # if units = AUM, acres-m2 conversion
+    if(yield[i, "Yield_units"] == "AUM") {
+      pasture_yield[i, new_yr] <- (yield[i, yr])*0.2223948433
+    # tons/acre to AUM/acre: multiply by 1.67 (Qiu and Turner 2013)
+    } else if(pasture_yield$value[i] %in% c(36,37,152, 176) & yield[i, "Yield_units"] == "tons") {
+      pasture_yield[i, new_yr] <- (yield[i, yr]*1.67)*0.2223948433
+    # if units=pounds, use tons-pounds to tons-AUM conversion
+    } else if(pasture_yield$value[i] %in% c(36,37,152, 176) & yield[i, "Yield_units"] == "pounds") {
+      pasture_yield[i, new_yr] <- ((yield[i, yr]*0.0005)*1.67)*0.2223948433
+    } else if(pasture_yield$value[i] == 1 & yield[i, "Yield_units"] == "bushels") { #corn
+      pasture_yield[i, new_yr] <- ((yield[i, yr]/39.368)*1.67)*0.2223948433
+    } else if(yield$Value[i] %in% c(225,237)) {#double crop with corn -- take corn only since other is not animal crop
+      pasture_yield[i, new_yr] <- pasture_yield[which(pasture_yield$value == 1), new_yr]
+    }
+  }
+}
+
+write.csv(pasture_yield,
+          "../data/food_and_feed/PastureYield_2016-20.csv",
+          row.names = FALSE)
+```
+
+Apply crop yields per pixel to rasters:
+
+```{r}
+#| eval: false
+
+cropyields <- lapply(cdl, function(x) {
+  n <- as.numeric(names(x))
+  y <- terra::classify(x,crop_yield[,c(1,n-2014)], others=NA)
+  y[is.na(y)] <- 0
+  return(y)
+})
+names(cropyields) <- paste("CropYields",seq(2016,2020,1),"NAis0",sep="_")
+
+five_yr_crop_yields <- Reduce("+", cropyields)
+
+# sum to target resolution
+five_yr_crop_yields <- project(five_yr_crop_yields, template_1km, method="sum")
+five_yr_crop_yields <- mask(five_yr_crop_yields, aoi)
+
+writeRaster(five_yr_crop_yields, 
+            "../data/food_and_feed/5-yr_CropYields.tif",
+            datatype = "INT2U",
+            overwrite=TRUE)
+```
+
+Apply livestock feed yields per pixel to rasters:
+
+```{r}
+#| eval: false
+
+pastureyields <- lapply(cdl, function(x) {
+  n <- as.numeric(names(x))
+  y <- terra::classify(x,pasture_yield[,c(1,n-2014)],others=NA)
+  y[is.na(y)] <- 0
+  return(y)
+})
+names(pastureyields) <- paste("PastureRangeYields",seq(2016,2020,1),"NAis0",sep="_")
+
+five_yr_lv_crop_yields <- Reduce("+", pastureyields)
+
+# sum to target resolution
+five_yr_lv_crop_yields <- project(five_yr_lv_crop_yields, template_1km, method="sum")
+five_yr_lv_crop_yields <- mask(five_yr_lv_crop_yields, aoi)
+
+writeRaster(five_yr_lv_crop_yields, 
+            "../data/food_and_feed/5-yr_LivestockCropYields.tif",
+            datatype = "INT2U",
+            overwrite=TRUE)
+```
+
+Apply crop economic values per pixel to rasters:
+
+```{r}
+#| eval: false
+
+yvalue <- read.csv("../data/food_and_feed/2016-20_YieldValue.csv")
+
+crop_value <- data.frame(value=yvalue$Value,
+                         USDPixel_2016=NA,
+                         USDPixel_2017=NA,
+                         USDPixel_2018=NA,
+                         USDPixel_2019=NA,
+                         USDPixel_2020=NA)
+
+for(yr in 3:7) { # for each year in yield data
+  new_yr <- yr-1
+  for(i in 1:nrow(crop_value)) { # for every row in the new data
+    crop_value[i, new_yr] <- (yvalue[i, yr])*0.2223948433
+  }
+}
+
+cropvalues <- lapply(cdl, function(x) {
+  n <- as.numeric(names(x))
+  y <- terra::classify(x,crop_value[,c(1,n-2014)], others=NA)
+  y[is.na(y)] <- 0
+  return(y)
+})
+names(cropvalues) <- paste("CropValue",seq(2016,2020,1),"NAis0",sep="_")
+
+five_yr_crop_value <- Reduce("+", cropvalues)
+
+# sum to target resolution
+five_yr_crop_value <- project(five_yr_crop_value, template_1km, method="sum")
+five_yr_crop_value <- mask(five_yr_crop_value, aoi)
+
+#convert to million USD
+five_yr_crop_value <- five_yr_crop_value/1e6
+
+writeRaster(five_yr_crop_value, 
+            "../data/food_and_feed/5-yr_CropYieldValue.tif",
+            datatype = "FLT4S",
+            overwrite=TRUE)
+```
+
+Agricultural land quality data (PVR) from [AFT](https://csp-fut.appspot.com/) can be requested: https://survey123.arcgis.com/share/3f8d2e46cec64288b53d235fa7cf7d40
+
+```{r}
+#| eval: false
+
+pvr <- rast("../data/food_and_feed/raw_data/PVR_2016_clip.tif")
+pvr_proj <- project(pvr, template_1km)
+pvr_msk <- mask(pvr_proj, aoi)
+
+writeRaster(pvr_msk,
+            "../data/food_and_feed/PVR_2016_clip_5070_1km.tif",
+            datatype = "FLT4S",
+            overwrite=TRUE)
+```
+
+```{r}
+#| label: fig-food
+#| fig-height: 5.5
+#| fig-width: 8
+
+food_rasts <- c(rast("../data/food_and_feed/5-yr_CropYields.tif"),
+                rast("../data/food_and_feed/5-yr_LivestockCropYields.tif"),
+                rast("../data/food_and_feed/5-yr_CropYieldValue.tif"),
+                rast("../data/food_and_feed/PVR_2016_clip_5070_1km.tif"))
+names(food_rasts) <- c("CropYield", "LvstkCropYield", "CropValue", "PVR")
+
+food_rasts$PVR[is.na(food_rasts$PVR)] <- 0
+food_rasts$PVR <- mask(food_rasts$PVR, food_rasts$CropYield)
+
+food_df <- as.data.frame(food_rasts, xy=TRUE)
+
+p1 <- ggplot(food_df, aes(x=x, y=y, fill=CropYield)) +
+  geom_raster() +
+  scale_fill_viridis_c(name = "tons", na.value="white") +
+  labs(title="Crop Production",
+       tag="a") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+p2 <- ggplot(food_df, aes(x=x, y=y, fill=LvstkCropYield)) +
+  geom_raster() +
+  scale_fill_viridis_c(name = "AUM", na.value="white") +
+  labs(title="Livestock Feed Production",
+       tag="b") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+p3 <- ggplot(food_df, aes(x=x, y=y, fill=CropValue)) +
+  geom_raster() +
+  scale_fill_viridis_c(name = "mil USD", na.value="white") +
+  labs(title="Crop Value",
+       tag="c") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+p4 <- ggplot(food_df, aes(x=x, y=y, fill=PVR)) +
+  geom_raster() +
+  scale_fill_viridis_c(name = "PVR", na.value="white") +
+  labs(title="Agricultural Potential",
+       tag="d") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+
+p1+p2+p3+p4 + plot_layout(ncol = 2)
+```

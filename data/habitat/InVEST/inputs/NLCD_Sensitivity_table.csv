@@ -1,0 +1,16 @@
+lucode,LULC_name,HABITAT,agri,uhd,ldr,pri_roads,sec_roads,trails
+11,Open Water,0,0,0,0,0,0,0
+21,"Developed, Open Space",0,0,0,0,0,0,0
+22,"Developed, Low Intensity",0,0,0,0,0,0,0
+23,"Developed, Med Intensity",0,0,0,0,0,0,0
+24,"Developed, High Intensity",0,0,0,0,0,0,0
+31,Barren lands,0,0,0,0,0,0,0
+41,Deciduous Forest ,1,0.7,0.8,0.6,0.8,0.6,0.4
+42,Evergreen Forest ,1,0.7,0.8,0.6,0.8,0.6,0.4
+43,Mixed Forest ,1,0.7,0.8,0.6,0.8,0.6,0.4
+52,Shrublands,1,0.7,0.8,0.6,0.7,0.5,0.4
+71,Grasslands,1,0.6,0.7,0.5,0.7,0.5,0.4
+81,Farmlands/Pasture Hay,0.2,0,0.5,0.4,0.5,0.4,0.4
+82,Farmlands/Cultivated areas,0.2,0,0.5,0.4,0.5,0.4,0.4
+90,Woody Wetlands,1,0.7,0.8,0.6,0.8,0.6,0.4
+95,Water-Wetlands,1,0.6,0.8,0.6,0.8,0.6,0.4

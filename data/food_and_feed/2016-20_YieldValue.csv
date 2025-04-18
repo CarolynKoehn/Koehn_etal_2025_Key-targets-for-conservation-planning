@@ -1,0 +1,52 @@
+Value,Category,2016_Value-Acre,2017_Value-Acre,2018_Value-Acre,2019_Value-Acre,2020_Value-Acre,Notes
+0,NA,0,0,0,0,0,
+1,Corn,835,855,941,916,935,
+4, Sorghum,,,,,,
+6, Sunflowers,,,,,,
+12, Sweet Corn,,,,,,
+14,Mint,,,,2232,2100,Peppermint
+21, Barley,555,451,508,522,541,
+22,Durum Wheat,470,514,540,504,543,
+23, Spring Wheat,378,429,501,452,471,
+24, Winter Wheat,371,352,456,435,512,
+25,Other Small Grains,,,,,,
+27, Rye,,,,,,
+28, Oats,212,194,235,301,321,
+31,Canola,,,,,,
+33,Safflower,,,,,,
+35, Mustard,,,,,,
+36, Alfalfa,568,544,638,695,707,
+37, Other Hay/Non Alfalfa,321,382,355,334,355,
+41, Sugarbeets,1788,1576,1863,1985,1796.694645,"2020 data not available, used average"
+42, Dry Beans,523,449,402,704,772,
+43, Potatoes,2989,3145,3263,3392,3276,
+44, Other Crops,,,,,,
+49, Onions,4744,5935,5794,6038,5297,
+53, Peas,309.2666667,203.625,257.0952381,272.3856914,340,"weighted avg(Austiran winter peas, dry edible peas) for 2016-18, just dry peas for 2019-20; 2019 data not available, used average"
+56, Hops,9054,9872,10576,10680,10758,
+57, Herbs,2189,1848,1985,,,Peppermint
+59, Sod/Grass Seed,,,,,,
+61, Fallow/Idle Cropland,0,0,0,0,0,
+66,Cherries,,,,,,
+67, Peaches,,,,,,
+68, Apples,,,,,,
+111,Open Water,0,0,0,0,0,
+121,Developed,0,0,0,0,0,
+122,Developed,0,0,0,0,0,
+123,Developed,0,0,0,0,0,
+124,Developed,0,0,0,0,0,
+131,Barren Land,,,,,,
+142,Evergreen Forest,,,,,,
+152,Shrubland,0,0,0,0,0,From rangelands.app
+176,Grassland/Pasture,0,0,0,0,0,From rangelands.app
+190,Woody Wetlands,,,,,,
+195,Herbaceous Wetlands,,,,,,
+205, Triticale,,,,,,
+206, Carrots,,,,,,
+219, Greens,,,,,,
+225, Dbl Crop WinWht/Corn,1206,1207,1397,1351,1447,"sum(WinterWheat, Corn) but actually taken from corn and wheat in R code"
+227, Lettuce,,,,,,
+229,Pupkim ,,,,,,
+237,Dbl Crop Barley/Corn,1390,1306,1449,1438,1476,"sum(Barley, Corn) but actually taken from corn and barley in R code"
+246, Radishes,,,,,,
+247, Turnips,,,,,,

@@ -1,0 +1,7 @@
+THREAT,MAX_DIST,WEIGHT,DECAY,CUR_PATH
+agri,4,0.8,exponential,ag_mask.tif
+uhd,5,1,exponential,urban_UHD_only_mask.tif
+ldr,2,0.7,exponential,urban_LDR_only_mask.tif
+pri_roads,3,0.8,exponential,SRP_primary_roads_30m.tif
+sec_roads,2,0.7,exponential,SRP_secondary_roads_30m.tif
+trails,1,0.5,exponential,SRP_all_trails_30m.tif

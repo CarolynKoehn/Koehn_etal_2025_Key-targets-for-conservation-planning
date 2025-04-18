@@ -1,0 +1,414 @@
+---
+title: "Habitat Quality NCP models"
+author: "Carolyn Koehn"
+---
+
+```{r}
+#| label: setup
+
+library(sf)
+library(tidyverse)
+library(terra)
+library(patchwork, quietly = TRUE)
+
+pixel_size <- 1000
+epsg <- 5070
+
+aoi <- st_read("../data/study_area/boundary.shp", quiet=TRUE) %>%
+  st_transform(epsg)
+
+template_1km <- rast(aoi, resolution=pixel_size)
+template_30m <- rast(aoi, resolution=30)
+```
+
+Idaho Crucial Habitat downloaded from https://data-idfggis.opendata.arcgis.com/datasets/IDFGgis::idaho-crucial-habitat/about
+
+```{r}
+#| eval: false
+
+id_cr_hab <- st_read("/vsizip/../data/habitat/raw_data/Idaho_Crucial_Habitat-shp.zip/Idaho_Crucial_Habitat.shp") %>%
+  st_transform(epsg)
+srp_cr_hab <- st_intersection(id_cr_hab, aoi) %>%
+  mutate(across(Ter_SOC:Aq_Rank, ~na_if(.x, 9999)))
+
+srp_ls_suit_rast <- rasterize(srp_cr_hab, template_1km, field="LS_merge", fun="max")
+srp_ter_soc_rast <- rasterize(srp_cr_hab, template_1km, field="Ter_SOC", fun="max")
+srp_wet_rip_rast <- rasterize(srp_cr_hab, template_1km, field="Wet_Rip", fun="max")
+
+ls_cond_rank <- ifel(srp_ls_suit_rast == 1, 5, 
+                   ifel(srp_ls_suit_rast == 2, 3, 
+                        ifel(srp_ls_suit_rast == 3, 1, NA)))
+ter_soc_rank <- srp_ter_soc_rast*-1+6
+wet_rip_rank <- srp_wet_rip_rast*-1+5
+
+writeRaster(ls_cond_rank, 
+            "../data/habitat/ID_crucial_habitat_landscape_condition_rank.tif",
+            datatype = "INT1U",
+            overwrite=TRUE)
+writeRaster(ter_soc_rank, 
+            "../data/habitat/ID_crucial_habitat_terrestrial_species_of_concern_rank.tif",
+            datatype = "INT1U",
+            overwrite=TRUE)
+writeRaster(wet_rip_rank, 
+            "../data/habitat/ID_crucial_habitat_wetland_riparian_rank.tif",
+            datatype = "INT1U",
+            overwrite=TRUE)
+```
+
+Datasets from Suraci et al. 2023 were downloaded from https://figshare.com/articles/dataset/Data_from_Suraci_et_al_2023_Ecosphere/22197592/1
+
+```{r}
+#| eval: false
+
+sur_connect <- rast("../data/habitat/raw_data/conus_connectivity.tif")
+srp_connect <- project(sur_connect, template_1km)
+srp_connect <- crop(srp_connect, aoi, mask=TRUE)
+
+sur_integrity <- rast("../data/habitat/raw_data/conus_integrity.tif")
+srp_integrity <- project(sur_integrity, template_1km)
+srp_integrity <- crop(srp_integrity, aoi, mask=TRUE)
+
+writeRaster(srp_connect, 
+            "../data/habitat/Suraci_connectivity.tif",
+            datatype = "INT2U",
+            overwrite = TRUE)
+writeRaster(srp_integrity, 
+            "../data/habitat/Suraci_integrity.tif",
+            datatype = "FLT4S",
+            overwrite=TRUE)
+```
+
+Datasets from Anderson et al. (2023) were downloaded from https://crcs.tnc.org/pages/data:
+(1) [Terrestrial Resilience](https://tnc.maps.arcgis.com/home/item.html?id=2b0ff2a8fb5340a5a5e91ff9c185aa1d) and (2) [Recognized Biodiversity Value](https://tnc.maps.arcgis.com/home/item.html?id=9286c38c567d4dde956087ca7af9d4b2)
+
+```{r}
+#| eval: false 
+
+res_terr <- rast("/vsizip/../data/habitat/raw_data/Resilience_terrestrial.zip/Resilience_terrestrial/resilience-terrestrial.tif")
+
+srp_res_terr <- project(res_terr, template_1km)
+srp_res_terr_msk <- crop(srp_res_terr, aoi, mask=TRUE)
+srp_res_terr_adj <- srp_res_terr_msk - min(srp_res_terr_msk[], na.rm=TRUE)
+
+writeRaster(srp_res_terr_adj, 
+            "../data/habitat/TNC_terrestrial_resilience_z-score_adj.tif",
+            datatype = "INT2U",
+            overwrite=TRUE)
+
+biodiv_val <- rast("/vsizip/../data/habitat/raw_data/RecognizedBiodiversityValue_2020_7_2020.zip/distribute_RecognizedBiodiversityValue_2020_7_2020/RecognizedBiodiversityValue_USERC_2020_7_2.tif")
+
+srp_biodiv_val <- project(biodiv_val, template_1km, method="max")
+srp_biodiv_val_msk <- crop(srp_biodiv_val, aoi, mask=TRUE)
+
+writeRaster(srp_biodiv_val_msk, 
+            "../data/habitat/TNC_biodiversity_value.tif",
+            datatype = "INT1U",
+            overwrite = TRUE)
+```
+
+The InVEST Habitat Quality model requires (1) current land cover, (2) data layers with the locations of all habitat threats, (3) a table of threats to habitat, their characteristics, and the file path to the threat data layers, (4) a table with the habitat suitability for each land cover and its sensitivity to threat, (5) a half-saturation constant (set to 0.087), and, optionally, (6) a data layer of protection against threats (we used GAP status).
+
+The threats table is `01_ThreatsW.csv`. We considered agricultural, urban, and low density residential land covers as threats, as well as highways, roads, and trails. The parameters for the land cover threats are from Blumstein and Thompson (2015) and the parameters for the roads threats are from Polasky et al. (2011).
+
+Land cover data from [AFT](https://csp-fut.appspot.com/) can be requested: https://survey123.arcgis.com/share/3f8d2e46cec64288b53d235fa7cf7d40
+
+Idaho Trails were downloaded from https://idpr-data-idaho.hub.arcgis.com/maps/idaho::idaho-recreation-trails/about (Layer: [Idaho Routes](https://idpr-data-idaho.hub.arcgis.com/datasets/idaho::idaho-routes/))
+
+```{r}
+#| eval: false
+
+# generating raster layers for threats
+
+# Urban
+
+# code to create this land use layer is in notebooks/climate-mitigation-ncp-models.qmd
+lu <- rast("../data/AFT_land_cover_2016_5070_30m_clip_reclassify_NAis0.tif")
+
+uhd <- ifel(lu==6|lu==1106,1,0)
+writeRaster(uhd,
+            "../data/habitat/InVEST/inputs/urban_UHD_only_mask.tif",
+            datatype = "INT1U",
+            overwrite=TRUE)
+ldr <- ifel(lu>1000 & lu!=1106,1,0)
+writeRaster(ldr,
+            "../data/habitat/InVEST/inputs/urban_LDR_only_mask.tif",
+            datatype = "INT1U",
+            overwrite = TRUE)
+
+# Agriculture
+
+ag <- ifel(lu %in% c(1,2,1101,1102),1,0)
+writeRaster(ag,
+            "../data/habitat/InVEST/inputs/ag_mask.tif",
+            datatype = "INT1U",
+            overwrite = TRUE)
+
+# Roads
+
+# download TIGER US Census roads shapefiles
+all_roads <- tigris::roads(state="ID", county=c("Jefferson", "Gem", "Madison", "Jerome", "Bonneville", "Teton", "Power" ,"Blaine", "Elmore", "Butte", "Minidoka", "Bingham","Ada County", "Cassia", "Payette", "Fremont", "Bannock", "Twin Falls", "Owyhee", "Washington", "Gooding", "Lincoln", "Camas", "Canyon", "Clark", "Adams"))
+
+# Primary roads (highways)
+prim_roads <- all_roads %>%
+  filter(MTFCC=="S1100") %>%
+  st_transform(epsg)
+
+# Secondary roads (streets)
+sec_roads <- all_roads %>%
+  filter(MTFCC %in% c("S1200","S1400","S1740")) %>%
+  st_transform(epsg)
+
+# Trails (walkways, trails, paths)
+trails <- all_roads %>%
+  filter(MTFCC %in% c("S1500","S1710","S1820","S1830")) %>%
+  st_transform(epsg)
+# supplemented with Idaho Parks and Recreation Trails data
+ID_trails <- st_read("/vsizip/../data/habitat/raw_data/Idaho_Recreation_Trails_-4261848000673127905.zip/Idaho_Routes.shp") %>%
+  st_make_valid() %>%
+  st_transform(epsg)
+SRP_trails <- st_intersection(aoi, ID_trails)
+
+all_srp_trails <- bind_rows(trails[,"geometry"],
+                          SRP_trails[,"geometry"])
+
+# rasterize roads
+road_list <- list(prim_roads,
+                  sec_roads,
+                  all_srp_trails)
+rast_roads <- lapply(road_list, function(x) {
+  r <- rasterize(x, template_30m, field=1, background=0, touches=TRUE)
+  return(r)
+})
+
+mapply(
+  function(x, n) {
+  writeRaster(x, 
+              paste("../data/habitat/InVEST/inputs/",n,".tif",sep=""),
+              datatype='INT1U',
+              overwrite=TRUE)
+  }, 
+  x = rast_roads, 
+  n = c("SRP_primary_roads_30m","SRP_secondary_roads_30m","SRP_all_trails_30m")
+)
+```
+
+Halperin et al. (2023) developed habitat suitability for Idaho for each land class present in the 2016 NLCD land classification product. This research uses 2016 American Farmland Trust land classification product. To apply Halperin et al.'s parameters to a source with different data classes, I use weighted averages of their parameters that reflect the NLCD classes present in each AFT class. All NLCD classes with <=1% representation in an AFT classes are eliminated and the 1% weight is distributed equally between all other classes.
+
+- Land cover data from [AFT](https://csp-fut.appspot.com/) can be requested: https://survey123.arcgis.com/share/3f8d2e46cec64288b53d235fa7cf7d40
+
+```{r}
+#| eval: false
+
+source("get_weighted_params_functions.R")
+
+# this data layer was created in notebooks/climate-mitigation-ncp-models.qmd
+aft <- rast("../data/AFT_land_cover_2016_5070_30m_clip_reclassify_NAis0.tif")
+data_without_params <- project(aft, template_30m, method = "near")
+#  Data with known parameters for InVEST
+# NLCD retrieved, projected, and cropped in Google Earth Engine
+nlcd <- rast("../data/NLCD_LandCover_Idaho_2016_reproj5070.tif")
+nlcd_proj <- project(nlcd, template_30m, method = "near")
+data_with_params <- crop(nlcd_proj, aoi, mask=TRUE)
+
+#  Known parameters for layer 2
+#    First column MUST be lucode (land use code)
+#    Second column MUST be LULC_name (land use class name)
+params_l2 <- read.csv("../data/habitat/InVEST/inputs/NLCD_Sensitivity_table.csv")
+#  Land class codes and corresponding land classes for each layer
+#    Codes and classes for layer 1
+classes_l1 <- data.frame(Code=c(1,2,3,4,5,6,7,10,12,1101,1102,1103,1104,1105,1106,1107,1110,1112),
+                          Class=c("Cropland", "Pastureland", "Rangeland", "Forestland", "Woodland", "Urban and highly developed areas", "Water", "Other areas", "Transportation", "Cropland within LDR", "Pastureland within LDR", "Rangeland within LDR", "Forestland within LDR", "Woodland within LDR", "UHD areas within LDR", "Water within LDR", "Other areas within LDR", "Transportation within LDR"))
+#    Codes and classes for layer 2
+classes_l2 <- data.frame(Code=c(0, 11, 12, 21, 22, 23, 24, 31, 41, 42, 43, 52, 71, 81, 82, 90, 95),
+                         Class=c("No Data", "Water", "Perennial Ice/Snow", "Developed, Open Space", "Developed, Low Intensity", "Developed, Med Intensity", "Developed, High Intensity", "Barren Land", "Deciduous Forest", "Evergreen Forest", "Mixed Forest", "Shrub/scrub", "Grassland", "Pasture/hay", "Cultivated Crops", "Woody Wetlands", "Emergent Herbaceous Wetlands"))
+#
+# Set options:
+cutoff <- 0.01  #[fraction] if a land class is present at a level under the cutoff, it will not be included in the parameter calculation and its land area will be distributed to other land use classes
+noDatacode_l2 <- 0
+
+rastStack <- c(data_without_params,data_with_params)
+
+#get a comparison table from get_weighted_params_functions.R
+comp_table <- create_comparison_table(rasterStack = rastStack, labels1 = classes_l1, labels2 = classes_l2)
+
+#get weighted parameters from get_weighted_params_functions.R
+weighted_params <- get_weighted_params(comparison.table = comp_table,
+                                       known.params = params_l2,
+                                       code.col = "L1_code",
+                                       label.col = "Class",
+                                       noData.col = as.character(noDatacode_l2),
+                                       totalArea.col = "Total_Area",
+                                       filterBelow = cutoff)
+
+# modify No Data row
+weighted_params[1,2] <- "NaN"
+weighted_params[1,3:ncol(weighted_params)] <- 0
+
+# some parameters are known but muddied in the weighting process above
+# they are manually weighted_params here
+hab_table <- weighted_params %>%
+  mutate(across(HABITAT:trails, 
+                ~ifelse(LULC_name %in% c("Water", "Water within LDR", "Urban and highly developed areas", "UHD areas within LDR"), 0, .x)))
+hab_table[which(hab_table$LULC_name == "Cropland"), 3:ncol(hab_table)] <- c(0.2, 0, 0.5, 0.4, 0.5, 0.4, 0.4)
+
+hab_table <- hab_table %>%
+  rename("lulc" = "lucode")
+
+write.csv(hab_table,
+          "../data/habitat/InVEST/inputs/01_Sensitivity_FUT_adj.csv",
+          row.names=FALSE)
+```
+
+
+GAP status data was downloaded from https://www.usgs.gov/programs/gap-analysis-project/science/pad-us-data-overview
+
+```{r}
+#| eval: false
+
+# accessibility to threats: GAP status
+
+gap <- st_read("/vsizip/../data/habitat/raw_data/PADUS3_0_State_ID_SHP.zip/PADUS3_0Combined_StateID.shp") %>%
+  st_make_valid() %>%
+  st_transform(epsg)
+
+srp_gap <- st_intersection(gap,aoi)
+
+srp_gap$access <- ifelse(srp_gap$GAP_Sts==1,0,
+                         ifelse(srp_gap$GAP_Sts==2,(1/3),
+                                ifelse(srp_gap$GAP_Sts==3,(2/3),
+                                       ifelse(srp_gap$GAP_Sts==4,1,NA))))
+st_write(srp_gap[,"access"], "../data/habitat/InVEST/inputs/gap_access.shp")
+```
+
+The metadata from this InVEST model generation can be found in `/data/climate_mitigation/InVEST`. The run log is `InVEST-natcap.invest.habitat_quality-log-2024-11-08--15_43_54.txt`, and the model output is `quality_c.tif`.
+
+```{r}
+#| eval: false
+
+# Resample to 1 km
+
+hab <- rast("../data/habitat/InVEST/quality_c.tif")
+hab <- mask(hab,aoi)
+
+hab_1km <- project(hab, template_1km)
+
+writeRaster(hab_1km, 
+            "../data/habitat/InVEST/hab_quality_1km.tif",
+            datatype = "FLT4S",
+            overwrite=TRUE)
+```
+
+```{r}
+#| label: "fig-hab"
+#| fig-height: 9.75
+#| fig-width: 8
+
+data_folder <- "../data/habitat"
+
+habitat_rasts <- c(rast(paste0(data_folder, "/ID_crucial_habitat_landscape_condition_rank.tif")),
+                   rast(paste0(data_folder, "/ID_crucial_habitat_terrestrial_species_of_concern_rank.tif")),
+                   rast(paste0(data_folder, "/ID_crucial_habitat_wetland_riparian_rank.tif")),
+                   rast(paste0(data_folder, "/Suraci_connectivity.tif")),
+                   rast(paste0(data_folder, "/Suraci_integrity.tif")),
+                   rast(paste0(data_folder, "/TNC_terrestrial_resilience_z-score_adj.tif")),
+                   rast(paste0(data_folder, "/TNC_biodiversity_value.tif")),
+                   rast(paste0(data_folder, "/InVEST/hab_quality_1km.tif")))
+
+names(habitat_rasts) <- c("Landscape_Condition", "Terrestrial_SOC", "Wet_Rip", "Connectivity", "Integrity", "Terrestrial_Resilience", "Biodiversity_Value", "InVEST")
+
+hab_df <- as.data.frame(habitat_rasts, xy=TRUE) %>%
+  mutate(InVEST = ifelse(InVEST == 0, NA, InVEST),
+         Terrestrial_Resilience = ifelse(Terrestrial_Resilience == 0, NA, Terrestrial_Resilience))
+
+p1 <- ggplot(hab_df, aes(x=x, y=y, fill=factor(Landscape_Condition))) +
+  geom_raster() +
+  scale_fill_viridis_d(name = "Rank", na.value="white") +
+  labs(title="Landscape Condition",
+       tag = "a") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+p2 <- ggplot(hab_df, aes(x=x, y=y, fill=factor(Terrestrial_SOC))) +
+  geom_raster() +
+  scale_fill_viridis_d(name = "Rank", na.value="white") +
+  labs(title="Terrestrial Species of Concern",
+       tag = "e") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+p3 <- ggplot(hab_df, aes(x=x, y=y, fill=factor(Wet_Rip))) +
+  geom_raster() +
+  scale_fill_viridis_d(name = "Rank", na.value="white") +
+  labs(title="Wetland / Riparian",
+       tag = "h") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+p4 <- ggplot(hab_df, aes(x=x, y=y, fill=Connectivity)) +
+  geom_raster() +
+  scale_fill_viridis_c(name = "Connectivity\n(unitless)", na.value="white") +
+  labs(title="Ecological Connectivity",
+       tag = "b") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+p5 <- ggplot(hab_df, aes(x=x, y=y, fill=Integrity)) +
+  geom_raster() +
+  scale_fill_viridis_c(name = "Integrity\n(unitless)", na.value="white") +
+  labs(title="Ecological Integrity",
+       tag = "d") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+p6 <- ggplot(hab_df, aes(x=x, y=y, fill=Terrestrial_Resilience)) +
+  geom_raster() +
+  scale_fill_viridis_c(name = "Z-score (adj)", na.value="white") +
+  labs(title="Terrestrial Resilience",
+       tag = "g") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+p7 <- ggplot(hab_df, aes(x=x, y=y, fill=as.factor(Biodiversity_Value))) +
+  geom_raster() +
+  scale_fill_viridis_d(name = "Rank", na.value="white") +
+  labs(title="Biodiversity Value",
+       tag = "f") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+p8 <- ggplot(hab_df, aes(x=x, y=y, fill=InVEST)) +
+  geom_raster() +
+  scale_fill_viridis_c(name = "Quality\n(unitless)", na.value="white") +
+  labs(title="Habitat Quality (InVEST)",
+       tag = "c") +
+  theme_void() +
+  theme(panel.background=element_rect(fill="white"),
+        plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9)) +
+  coord_sf(default_crs = epsg)
+
+p1+p4+p8+p5+p2+p7+p6+p3 + plot_layout(ncol = 2)
+```
+

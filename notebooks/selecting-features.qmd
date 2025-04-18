@@ -1,0 +1,223 @@
+---
+title: "Selecting Features"
+author: "Carolyn Koehn"
+---
+
+```{r}
+#| label: setup
+
+library(tidyverse)
+library(patchwork)
+library(terra)
+library(gurobi)
+library(prioritizr)
+source("get_optim_function.R")
+```
+
+```{r}
+#| label: fig-redundants
+#| fig-cap: "Results of the sensitivity analysis to identify redundant NCP datasets. For each NCP category, we created a full solution containing all indicators in that category (@tbl-ncp-data) and alternate scenarios with every possible combination of NCP indicators within each category. We then tested the spatial difference (EMD) between the alternate solutions and the full solution. Removal of NCP indicators in some NCP categories had a minute affect on priority area solutions. Solutions that were very similar to the full solution but did not contain all indicators are depicted in blue, with the NCP indicators they omitted noted. We classified these omitted indicators as redundant and did not include them in the all-NCP analysis. Other solutions tested are depicted in gray."
+#| fig-height: 4.75
+#| fig-width: 6.85
+
+emd_series_list <- list(read.csv("../data/climate_mitigation/sensitivity_analysis/emd_series_mitigation.csv"), read.csv("../data/climate_mitigation/sensitivity_analysis/emd_series_adaptation.csv"), read.csv("../data/food_and_feed/sensitivity_analysis/emd_series.csv"), read.csv("../data/water_quality/sensitivity_analysis/emd_series.csv"), read.csv("../data/habitat/sensitivity_analysis/emd_series.csv"), read.csv("../data/recreation/sensitivity_analysis/emd_series.csv"))
+names_ncp <- c("C Stock Protection", "Climate Adaptation", "Food", "Water Quality", "Habitat", "Recreation")
+
+for(i in 1:length(emd_series_list)) {
+  emd_series_list[[i]]$NCP_Cat <- names_ncp[i]
+}
+
+emd_series <- do.call(rbind, emd_series_list)
+emd_series$NCP_Cat <- factor(emd_series$NCP_Cat, levels = c("C Stock Protection", "Climate Adaptation", "Food", "Water Quality", "Habitat", "Recreation"))
+emd_series <- emd_series %>%
+  mutate(chosen = ifelse(((NCP_Cat == "C Stock Protection" & config == 5) |
+           (NCP_Cat == "Food" & config == 13) |
+           (NCP_Cat == "Water Quality" & config == 2) |
+           (NCP_Cat == "Habitat" & config == 53)),
+           "Low AUC Solution Selected", "Solutions Not Selected"))
+
+chosen_df <- emd_series %>%
+  filter((NCP_Cat == "C Stock Protection" & config == 5) |
+           (NCP_Cat == "Food" & config == 13) |
+           (NCP_Cat == "Water Quality" & config == 2) |
+           (NCP_Cat == "Habitat" & config == 53)) %>%
+  mutate(LeavesOut = rep(c("C Storage\n(global est)", "Crop Value", "Estimated Nitrates", "Landscape Condition,\nSpecies of Concern,\nIntegrity, Biodiversity"), each=15))
+
+figure3 <- ggplot(emd_series, aes(x=target, y=emd, group=as.factor(config))) +
+  facet_wrap(facets=~NCP_Cat, nrow=2) +
+  geom_line(aes(color=chosen)) +
+  geom_line(data=chosen_df, color="blue2") +
+  geom_label(data=chosen_df, aes(label = paste0("Leaves Out:\n", LeavesOut), x=Inf, y=Inf), hjust="right", vjust="top", label.size=0) +
+  scale_x_continuous(limits=c(5,75), breaks=seq(5,75,10),
+                     name = "Target (% NCP protected)") +
+  scale_y_continuous(limits=c(-0.01,150)) +
+  scale_color_manual(values = c("blue2", "gray80"), name="") +
+  ylab("Difference from full solution") +
+  theme_classic() +
+  theme(panel.background = element_blank(),
+        legend.position = "bottom")
+
+figure3
+```
+
+Save as image:
+
+```{r}
+#| eval: false
+
+png(filename = "../figures/Figure_3.png",
+    width = 6.85,
+    height = 4.75,
+    units = "in",
+    res = 90)
+figure3
+dev.off()
+```
+
+# Correlation table
+
+Import all NCP rasters:
+
+```{r}
+climatemit_rasts <- c(rast("../data/climate_mitigation/Hengl_soil_organic_C_estimates.tif"),
+                   rast("../data/climate_mitigation/Spawn_2010_carbon_storage_estimate.tif"),
+                   rast("../data/climate_mitigation/InVEST/tot_c_cur_1km.tif"))
+names(climatemit_rasts) <- c("SOC", "CStorage", "InVESTCarbon")
+
+climateadap_rasts <- c(rast("../data/climate_mitigation/Hamann_2014_climate_accessibility.tif"),
+                   rast("../data/climate_mitigation/Carroll_2018_climate_stability.tif"))
+names(climateadap_rasts) <- c("ClimAcc", "ClimStability")
+
+food_rasts <- c(rast("../data/food_and_feed/5-yr_CropYields.tif"),
+                rast("../data/food_and_feed/5-yr_LivestockCropYields.tif"),
+                rast("../data/food_and_feed/5-yr_CropYieldValue.tif"),
+                rast("../data/food_and_feed/PVR_2016_clip_5070_1km.tif"))
+names(food_rasts) <- c("CropYield", "LvstkCropYield", "CropValue", "PVR")
+
+watqual_rasts <- c(rast("../data/water_quality/watershed_retention-load_ratio.tif"),
+               rast("../data/water_quality/watershed_nitrate_rank.tif"))
+names(watqual_rasts) <- c("Retention", "Nitrates")
+
+data_folder <- "../data/habitat"
+habitat_rasts <- c(rast(paste0(data_folder, "/ID_crucial_habitat_landscape_condition_rank.tif")),
+                   rast(paste0(data_folder, "/ID_crucial_habitat_terrestrial_species_of_concern_rank.tif")),
+                   rast(paste0(data_folder, "/ID_crucial_habitat_wetland_riparian_rank.tif")),
+                   rast(paste0(data_folder, "/Suraci_connectivity.tif")),
+                   rast(paste0(data_folder, "/Suraci_integrity.tif")),
+                   rast(paste0(data_folder, "/TNC_terrestrial_resilience_z-score_adj.tif")),
+                   rast(paste0(data_folder, "/TNC_biodiversity_value.tif")),
+                   rast(paste0(data_folder, "/InVEST/hab_quality_1km.tif")))
+names(habitat_rasts) <- c("Landscape_Condition", "Terrestrial_SOC", "Wet_Rip", "Connectivity", "Integrity", "Terrestrial_Resilience", "Biodiversity_Value", "InVESTHabitat")
+
+rec_rasts <- c(rast("../data/recreation/Hooftman_recreation_ensemble.tif"),
+         rast("../data/recreation/rec_prob.tif"))
+names(rec_rasts) <- c("RecProb_Hooftman", "RecProb_region")
+
+all_ncp_rasts <- c(climatemit_rasts,
+                   climateadap_rasts,
+                   food_rasts,
+                   watqual_rasts,
+                   habitat_rasts,
+                   rec_rasts)
+```
+
+Find correlations:
+
+```{r}
+cortable <- layerCor(all_ncp_rasts, fun="pearson")$correlation
+
+y_labels <- c("Soil Organic C", "C Storage\n(Spawn & Gibbs 2020)", "C Storage\n(InVEST model)", "Climate Accessibility", "Climate Stability", "Crop Provision", "Livestock Feed Provision", "Crop Value", "Agricultural Potential", "N Retention Capacity", "Estimated Nitrates", "Landscape Condition", "Terrestrial Species of Concern", "Wetland/Riparian", "Ecological Connectivity", "Ecological Integrity", "Terrestrial Resilience", "Biodiversity Value", "Habitat Quality", "Recreation Probability\n(Hooftman et al. 2023)", "Recreation Probability\n(regional estimate)")
+
+rownames(cortable) <- y_labels
+colnames(cortable) <- y_labels
+```
+
+Plot:
+
+```{r}
+#| label: fig-corrs
+#| width: 6.5
+#| height: 8
+
+cor_df <- cortable %>%
+  as.data.frame(.) %>%
+  mutate(NCP1 = rownames(.)) %>%
+  pivot_longer(!NCP1, names_to = "NCP2", values_to = "corr") %>%
+  distinct(., comb = pmap_chr(select(., starts_with("NCP")), 
+                           ~paste0(sort(c(...)), collapse="_")),
+           .keep_all = TRUE) %>%
+  mutate(NCP1 = factor(NCP1, levels=y_labels),
+         NCP2 = factor(NCP2, levels=y_labels)) %>%
+  filter(!(corr==1))
+
+ggplot(cor_df, aes(x=NCP1, y=NCP2, fill=corr)) +
+  geom_tile(show.legend = F) +
+  geom_text(aes(label = round(corr, 2)), size=2) +
+  scale_fill_gradient2(low="#c51b7d", mid="#f7f7f7", high="#4d9221") +
+  labs(x="", y="") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=90, hjust=1, vjust=1, size=7),
+        axis.text.y = element_text(size=7),
+        plot.margin = margin(t=5,b=-5,l=-10,r=15))
+```
+
+Check all-NCP solution with no selection (all 21 data layers) against all-NCP solution with selection (14 data layers):
+
+```{r}
+#| label: "check all-NCP solutions"
+#| eval: false
+
+cost <- rast("../data/fmv_5070_1km_USD_per_km2.tif")
+# Cost values are too high for optimization
+cost.mil <- cost/1e6
+
+ncp14 <- all_ncp_rasts[[c("SOC", "InVESTCarbon", "ClimAcc", "ClimStability", "CropYield", "LvstkCropYield", "PVR", "Retention", "Wet_Rip", "Connectivity", "Terrestrial_Resilience", "InVESTHabitat", "RecProb_Hooftman", "RecProb_region")]]
+
+solution_14 <- generate_optim(inputs=ncp14,
+                           cost=cost.mil, targets=seq(0.05,0.75,0.05),
+                           output.rasters=TRUE, output.table=FALSE,
+                           force.solve = TRUE)
+solutions_14 <- rast(solution_14)
+names(solutions_14) <- paste0("Target: ", seq(5,75,5), "%")
+solutions_14_agg <- aggregate(solutions_14, fact=5, fun="mean")
+
+solution_21 <- generate_optim(inputs=all_ncp_rasts,
+                           cost=cost.mil, targets=seq(0.05,0.75,0.05),
+                           output.rasters=TRUE, output.table=FALSE,
+                           force.solve = TRUE)
+solutions_21 <- rast(solution_21)
+names(solutions_21) <- paste0("Target: ", seq(5,75,5), "%")
+solutions_21_agg <- aggregate(solutions_21, fact=5, fun="mean")
+
+emd_series <- rep(NA, times=15)
+for(t in 1:15) {
+  emd_series[t] <- emdist::emd2d(
+    A = as.matrix(solutions_14_agg[[t]], wide=TRUE)/sum(as.matrix(solutions_14_agg[[t]], wide=TRUE), na.rm=TRUE), 
+    B = as.matrix(solutions_21_agg[[t]], wide=TRUE)/sum(as.matrix(solutions_21_agg[[t]], wide=TRUE), na.rm=TRUE),
+    xdist = 5, ydist = 5,
+    max.iter = 1000)
+}
+
+write.csv(data.frame(target=seq(5,75,5),
+                     emd=emd_series), 
+          "../data/14-vs-21_emd-series.csv",
+          row.names = FALSE)
+
+series.x <- emd_series$target
+series.y <- emd_series$emd
+AUC <- sum(diff(series.x) * zoo::rollmean(series.y, 2))
+```
+
+```{r}
+#| label: fig-14-21-compare
+
+emd_series <- read.csv("../data/14-vs-21_emd-series.csv")
+ggplot(emd_series, aes(x=target, y=emd)) +
+  geom_path() +
+  scale_x_continuous(breaks = seq(5,75,5),
+                     name="Target (% NCP protected)") +
+  labs(y="Difference between solutions (EMD)",
+       title = "Comparison of scenarios with and without feature selection") +
+  theme_classic()
+```
+

@@ -1,0 +1,59 @@
+---
+title: "Land Cost"
+author: "Carolyn Koehn"
+---
+
+```{r}
+#| label: setup
+
+library(sf)
+library(tidyverse)
+library(terra)
+
+pixel_size <- 1000
+epsg <- 5070
+
+aoi <- st_read("../data/study_area/boundary.shp", quiet=TRUE) %>%
+  st_transform(epsg)
+
+template_1km <- rast(aoi, resolution=pixel_size)
+```
+
+Land cost data from Nolte (2020): https://doi.org/10.1073/pnas.2012865117
+
+```{r}
+#| label: "fig-landcost"
+#| fig-height: 3.75
+
+cost <- rast("/vsizip/../data/places_fmv_pnas_dryad.zip/1 estimates/places_fmv_all.tif")
+# transform to $/ha
+cost.ha <- exp(cost)
+cost.ha <- project(cost.ha, template_1km)
+cost.ha <- mask(cost.ha, aoi)
+# transform to $/km2
+cost.km2 <- cost.ha*100
+
+as.data.frame(cost.km2, xy=TRUE) %>%
+  ggplot(., aes(x=x, y=y, fill=places_fmv_all/1e6)) +
+  geom_raster() +
+  scale_fill_gradientn(name = "mil USD/km2", na.value="white",
+                       values=scales::rescale(c(0.04,1,1.5, seq(10,50,10)), to=c(0,1)),
+                       colors=viridisLite::viridis(8),
+                       breaks=c(0.04,1,1.5, seq(10,50,10)),
+                       labels=c("\n0.04", "1\n", "", as.character(seq(10,50,10))),
+                       limits=c(0,56)) +
+  theme_void() +
+  coord_sf(default_crs = epsg)
+```
+
+Save to file:
+
+```{r}
+#| eval: false
+
+writeRaster(cost.km2,
+            "../data/fmv_5070_1km_USD_per_km2.tif",
+            datatype = "INT4U",
+            overwrite=TRUE)
+```
+
