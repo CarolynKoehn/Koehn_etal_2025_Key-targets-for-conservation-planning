@@ -1,5 +1,5 @@
 ---
-title: Carbon stock protection and food production are key targets for conservation planning in a landscape of public and private agricultural lands
+title: Carbon stock protection and food production are key targets for conservation planning in a landscape of public and private lands
 author:
   - name: Carolyn Koehn
     email: carolynkoehn@u.boisestate.edu
@@ -70,8 +70,6 @@ abstract: |
   Demand for land for urban development, food production, and protected areas is increasing, leading to land scarcity. In response, agricultural lands are increasingly targeted for protection. Yet, which land attributes should be used to identify priority lands to protect remains largely unknown. Here, we apply the nature’s contributions to people [NCP] framework in Idaho’s Snake River Plain, a water-limited, climate-sensitive ecoregion, a public-lands dominated area, and the home of one of the fastest growing human populations in the United States. We quantified 21 NCPs across public and private lands, and used systematic conservation planning to generate cost-efficient land protection solutions. We also developed a sensitivity analysis workflow to determine which NCP inputs were most influential for priority protected area selection. We found that current protected areas were highly effective, protecting over half of 17 out of the 21 NCP. However, food production is severely under-protected. Food production and carbon stock protection had the most influence on conservation planning scenarios. Our results suggest that ignoring climate-related NCP in agricultural land protection decisions, even in sub-regional planning where climate seems relatively homogenous, can limit how private land protection strategies contribute to climate mitigation and adaptation. We show how private land protections complement public lands networks for NCP protection and reveal the importance of including climate considerations in local scale conservation planning. Our reproducible workflows for NCP quantification and conservation planning sensitivity analysis can be used to systematically plan for a broad suite of human benefits with growing competition among land uses.
 ---
 
-<!-- https://www.sciencedirect.com/journal/biological-conservation/publish/guide-for-authors -->
-
 # Introduction
 
 Land is a limited resource, and globally, humanity is playing a balancing act among three essential land uses. Highly developed urban areas can provide safe and affordable housing [United Nations Sustainable Development Goal 11, @thacker2019], agricultural areas produce food (UN SDG 2), and protected areas provide diverse benefits, including terrestrial habitat (UN SDG 15), climate change mitigation (UN SDG 13), and sustainable tourism [UN SDG 8, @kettunen2021]. The interplay between urban, agriculture, and protected lands are well documented. Built-up areas currently cover very little of the Earth’s surface (ca. 2%), but they are projected to double in area by 2040 [@vanvliet2017]. Over half of urban expansion is predicted to occur on agricultural lands that currently grow food crops or animal feed crops [@vanvliet2017]. Urban expansion onto croplands is accompanied by agricultural land expansion into new areas and intensified use of remaining agricultural lands [@vanvliet2019; @you2016]. Agricultural lands already cover ca. 50% of global ice-free lands [@ellis2010], and are predicted to increase 10-25% by 2050 [@schmitz2014]. Rapid growth of urban and agricultural lands have been accompanied by the expansion of protected area networks, from ca. 10\% of Earth’s lands in 1990 to ca. 17\% of terrestrial areas in 2020 [@unep2021], and there are calls to protect up to 50% of the Earth [@dinerstein2020]. With a limited amount of land on Earth, meeting the growing needs for food, developed land, and nature conservation is a major challenge for humanity.
@@ -97,7 +95,7 @@ The Snake River Plain ecoregion of the United States [@ecoregions] intersects wi
 
 ## Data
 
-Data and code used for this analysis are available on GitHub: [link to author's GitHub repository removed for double-blind review].
+Data and code used for this analysis are available on GitHub: https://github.com/CarolynKoehn/Koehn_etal_2025_Key-targets-for-conservation-planning.git.
 
 ### Land Use
 
