@@ -8,6 +8,10 @@ The Quarto manuscript to generate the pre-print is `Koehn_etal_2025_Key targets 
 
 All code files used for this project are found in the `notebooks` folder. Intermediate data sources used to create figures are found in the `data` folder. Original data sources are described in the source code and manuscript.
 
+# Contact Information
+
+Contact corresponding author Carolyn Koehn at carolynkoehn@u.boisestate.edu.
+
 # Licenses
 The content of the manuscript itself is licensed under the [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International license](https://creativecommons.org/licenses/by-nc-nd/4.0/). 
 
