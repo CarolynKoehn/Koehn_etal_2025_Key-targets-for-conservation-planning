@@ -1,4 +1,4 @@
-This repository contains the underlying code to generate a pre-print of the manuscript titled "Carbon stock protection and food production are key targets for conservation planning in a landscape of public and private agricultural lands."
+This repository contains the underlying code to generate a pre-print of the manuscript titled "Carbon stock protection and food production are key targets for conservation planning in a landscape of public and private lands."
 
 # Generating the pre-print
 
