@@ -216,7 +216,7 @@ png(filename = "../figures/Figure_4.png",
     width = 6.85,
     height = 5.75,
     units = "in",
-    res = 90)
+    res = 1000)
 figure4
 dev.off()
 ```
@@ -647,7 +647,7 @@ png(filename = "../figures/Figure_5.png",
     width = 8,
     height = 9,
     units = "in",
-    res = 100)
+    res = 1000)
 all_layer_plot + no_food_plot + no_clim_plot + diff_plot_landuse + diff_plot_crops + diff_plot_tenure  + plot_layout(design=layout, widths=c(1,0.1,1))
 dev.off()
 ```

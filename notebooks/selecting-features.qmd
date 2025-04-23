@@ -69,7 +69,7 @@ png(filename = "../figures/Figure_3.png",
     width = 6.85,
     height = 4.75,
     units = "in",
-    res = 90)
+    res = 1000)
 figure3
 dev.off()
 ```
