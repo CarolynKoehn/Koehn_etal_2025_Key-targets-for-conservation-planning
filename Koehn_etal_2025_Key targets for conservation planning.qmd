@@ -95,8 +95,6 @@ The Snake River Plain ecoregion of the United States [@ecoregions] intersects wi
 
 ## Data
 
-Data and code used for this analysis are available on GitHub: https://github.com/CarolynKoehn/Koehn_etal_2025_Key-targets-for-conservation-planning.git.
-
 ### Land Use
 
 We used Farms Under Threat 2040 land use data [@hunter2022; @theobald2018], which contain agriculture-specific land classes (e.g. cropland, rangeland). They also differentiate lands within low-density residential areas, which we hypothesized would have different NCP than the same types of land cover outside of residential areas (not shown in @fig-studyarea-2, see @sec-land-use-data).
