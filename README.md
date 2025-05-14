@@ -1,8 +1,8 @@
-This repository contains the underlying code to generate a pre-print of the manuscript titled "Carbon stock protection and food production are key targets for conservation planning in a landscape of public and private lands." It can be read directly from the file [Koehn_etal_2025_Key targets for conservation planning.docx](https://github.com/CarolynKoehn/Koehn_etal_2025_Key-targets-for-conservation-planning/blob/main/Koehn_etal_2025_Key%20targets%20for%20conservation%20planning.docx).
+This repository contains the underlying code to generate a pre-print of the manuscript titled "Carbon stock protection and food production are key targets for conservation planning in a landscape of public and private lands." It can be read directly from the file [`Koehn_etal_2025_Key targets for conservation planning.docx`](https://github.com/CarolynKoehn/Koehn_etal_2025_Key-targets-for-conservation-planning/blob/main/Koehn_etal_2025_Key%20targets%20for%20conservation%20planning.docx).
 
 # Generating the pre-print
 
-The Quarto manuscript to generate the pre-print is `Koehn_etal_2025_Key targets for conservation planning.qmd`. Open this file in RStudio and select `Render` to generate the pre-print as a `.docx` file.
+The Quarto manuscript to generate the pre-print is [`Koehn_etal_2025_Key targets for conservation planning.qmd`](https://github.com/CarolynKoehn/Koehn_etal_2025_Key-targets-for-conservation-planning/blob/main/Koehn_etal_2025_Key%20targets%20for%20conservation%20planning.qmd). Open this file in RStudio and select `Render` to generate the pre-print as a `.docx` file.
 
 To generate the pre-print, you will need to request a license and install [Gurobi optimization software](https://www.gurobi.com/academia/academic-program-and-licenses/), as well as installing all R packages used in the scripts located in the `notebooks` folder.
 
