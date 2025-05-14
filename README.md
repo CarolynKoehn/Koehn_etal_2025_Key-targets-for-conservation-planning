@@ -1,4 +1,4 @@
-This repository contains the underlying code to generate a pre-print of the manuscript titled "Carbon stock protection and food production are key targets for conservation planning in a landscape of public and private lands." It can be read directly from the file [Koehn_etal_2025_Key targets for conservation planning.docx](Koehn_etal_2025_Key targets for conservation planning.docx).
+This repository contains the underlying code to generate a pre-print of the manuscript titled "Carbon stock protection and food production are key targets for conservation planning in a landscape of public and private lands." It can be read directly from the file [Koehn_etal_2025_Key targets for conservation planning.docx](https://github.com/CarolynKoehn/Koehn_etal_2025_Key-targets-for-conservation-planning/blob/main/Koehn_etal_2025_Key%20targets%20for%20conservation%20planning.docx).
 
 # Generating the pre-print
 
