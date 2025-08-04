@@ -72,6 +72,13 @@ png(filename = "../figures/Figure_3.png",
     res = 1000)
 figure3
 dev.off()
+
+cairo_ps(filename = "../figures/Figure_3.eps",
+    width = 6.85,
+    height = 4.7,
+    fallback_resolution = 1200)
+print(figure3)
+dev.off()
 ```
 
 # Correlation table

@@ -303,5 +303,21 @@ png(filename = "../figures/Figure_1.png",
     res = 1000)
 studyarea_lu + studyarea_lt + inset + inset_us + plot_layout(design=layout)
 dev.off()
+
+setEPS()
+postscript("../figures/Figure_1.eps",
+    width = 8.5,
+    height = 5.5,
+    horizontal = FALSE,
+    onefile = FALSE)
+studyarea_lu + studyarea_lt + inset + inset_us + plot_layout(design=layout)
+dev.off()
+
+cairo_ps("../figures/Figure_1.eps",
+    width = 8.5,
+    height = 5.5,
+    fallback_resolution = 1200)
+studyarea_lu + studyarea_lt + inset + inset_us + plot_layout(design=layout)
+dev.off()
 ```
 

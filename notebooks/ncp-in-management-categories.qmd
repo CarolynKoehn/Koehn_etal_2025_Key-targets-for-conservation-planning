@@ -340,5 +340,12 @@ png(filename = "../figures/Figure_2.png",
     res = 1000)
 figure2
 dev.off()
+
+cairo_ps(filename = "../figures/Figure_2.eps",
+    width = 6.75,
+    height = 4.75,
+    fallback_resolution = 1200)
+print(figure2)
+dev.off()
 ```
 
