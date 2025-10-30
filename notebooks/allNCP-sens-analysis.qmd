@@ -1,6 +1,6 @@
 ---
 title: "All NCP Sensitivity Analysis"
-authro: "Carolyn Koehn"
+author: "Carolyn Koehn"
 ---
 
 ```{r}
