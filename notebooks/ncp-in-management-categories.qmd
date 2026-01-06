@@ -233,10 +233,10 @@ Contribution of each category to NCP:
 y_labels <- c("Recreation Probability\n(regional estimate)", "Recreation Probability\n(Hooftman et al. 2023)", "Habitat Quality", "Biodiversity Value", "Terrestrial Resilience", "Ecological Integrity", "Ecological Connectivity", "Wetland/Riparian", "Terrestrial Species of Concern", "Landscape Condition", "Estimated Nitrates", "N Retention Capacity", "Agricultural Potential", "Crop Value", "Livestock Feed Provision", "Crop Provision", "Climate Stability", "Climate Accessibility", "C Storage\n(InVEST model)", "C Storage\n(Spawn & Gibbs 2020)", "Soil Organic C", "Percent of Study Area")
 
 ggplot(ncp_lt_table, aes(y=NCP, x=LT)) +
-  geom_tile(aes(fill=Percent_rep), show.legend = T, alpha=0.75) +
+  geom_tile(show.legend = T, alpha=0.75, fill=NA) +
   geom_text(aes(label=label), nudge_x=-0.25) +
-  scale_fill_viridis_c(limits=c(0,100), name=" Percent\nProvided",
-                       guide = guide_colourbar(order=1)) +
+  # scale_fill_viridis_c(limits=c(0,100), name=" Percent\nProvided",
+  #                      guide = guide_colourbar(order=1)) +
   new_scale_fill() +
   geom_label(aes(fill=Rep_deviance, size=Rep_deviance_bins, label=rep_dev_label),
              nudge_x = 0.25, color="black") +
@@ -248,18 +248,22 @@ ggplot(ncp_lt_table, aes(y=NCP, x=LT)) +
   geom_hline(yintercept = 21.5) +
   scale_y_discrete(limits=c(rev(names(all_ncp_rasts)), "Percent of Study Area"),
                    name="NCP category",
-                   labels = y_labels) +
+                   labels = y_labels,
+                   minor_breaks = seq(1.5, 20.5, 1)) +
   scale_x_discrete(limits=levels(ncp_lt_table$LT),
                    name="Land Tenure Category",
                    position = "top",
-                   labels=rev(c("Other\neasement", "PAL", "State", "Private", "Federal"))) +
+                   labels=rev(c("Other\neasement", "PAL", "State", "Private", "Federal")),
+                   minor_breaks = seq(1.5, 4.5, 1)) +
   theme_classic() +
   theme(axis.line = element_blank(),
         axis.ticks = element_blank(),
         text = element_text(size=14),
         legend.position = "bottom",
         legend.title = element_text(hjust=1, size=10),
-        axis.title = element_text(size=12))
+        axis.title = element_text(size=12),
+        panel.grid.minor = element_line(color="gray80"),
+        axis.text.x = element_text(face = "bold"))
 ```
 
 Figure with summaries for each NCP bin:
@@ -298,11 +302,11 @@ ncp_bins_lt_table <- rbind(ncp_bins_lt_table,
                                     levels = c("<-5", "(-5,-0.1]", "(-0.1,0.1]", "(0.1,5]", ">5")))
 
 figure2 <- ggplot(ncp_bins_lt_table, aes(y=NCP_bin, x=LT)) +
-  geom_tile(show.legend = T, alpha=0.75, aes(fill=avg_rep)) +
+  geom_tile(show.legend = T, alpha=0.75, fill=NA) +
   geom_text(aes(label=label), nudge_x=-0.25) +
-  scale_fill_viridis_c(limits=c(0,90), name="Percent\nProvided",
-                       breaks=c(0,30,60,90),
-                       guide = guide_colourbar(order=1)) +
+  # scale_fill_viridis_c(limits=c(0,90), name="Percent\nProvided",
+  #                      breaks=c(0,30,60,90),
+  #                      guide = guide_colourbar(order=1)) +
   new_scale_fill() +
   geom_label(aes(fill=avg_dev, size=Rep_deviance_bins, label=rep_dev_label),
              nudge_x = 0.25, color="black") +
@@ -313,17 +317,21 @@ figure2 <- ggplot(ncp_bins_lt_table, aes(y=NCP_bin, x=LT)) +
   geom_hline(yintercept = 6.5) +
   scale_y_discrete(name="NCP category",
                    limits=rev(c("Percent of Study Area", "C Stock Protection", "Climate Adaptation", "Food", "WatQual", "Habitat", "Recreation")),
-                   labels = rev(c("Percent of\nStudy Area", "C Stock\nProtection", "Climate\nAdaptation", "Food", "Water\nQuality", "Habitat", "Recreation"))) +
+                   labels = rev(c("Percent of\nStudy Area", "C Stock\nProtection", "Climate\nAdaptation", "Food", "Water\nQuality", "Habitat", "Recreation")),
+                   minor_breaks = seq(1.5, 6.5, 1)) +
   scale_x_discrete(limits=levels(ncp_lt_table$LT),
                    name="Land Tenure Category",
                    position = "top",
-                   labels=rev(c("Other\neasement", "PAL", "State", "Private", "Federal"))) +
+                   labels=rev(c("Other\neasement", "PAL", "State", "Private", "Federal")),
+                   minor_breaks = seq(1.5, 4.5, 1)) +
   theme_classic() +
   theme(axis.line = element_blank(),
         axis.ticks = element_blank(),
         legend.position = "bottom",
         legend.title = element_text(hjust=1, size=10),
-        axis.title = element_text(size=12))
+        axis.title = element_text(size=12),
+        panel.grid.minor = element_line(color="gray80"),
+        axis.text.x = element_text(face = "bold"))
 
 figure2
 ```

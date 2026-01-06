@@ -201,7 +201,7 @@ The all-NCP solution was most sensitive to two NCP categories: (a) food and feed
 
 {{< embed notebooks/allNCP-sens-analysis.qmd#fig-diff-maps >}}
 
-Since the all-NCP solution was most sensitive to food and C stock protection NCP, we compared the outcomes of these dissimilar solutions when these NCP were left out [@fig-diff-maps, @supptbld-sol-diffs]. The all-NCP solution ([@fig-diff-maps]a) was 33,677 km$^2$, while the Leave Out (LO) Food solution ([@fig-diff-maps]b) was 34,244 km$^2$ and the LO-C stock protection solution ([@fig-diff-maps]c) was 33,517 km$^2$. 
+Since the all-NCP solution was most sensitive to food and C stock protection NCP, we compared the outcomes of these dissimilar solutions when these NCP were left out (@fig-diff-maps, @supptbld-sol-diffs). The all-NCP solution ([@fig-diff-maps]a) was 33,677 km$^2$, while the Leave Out (LO) Food solution ([@fig-diff-maps]b) was 34,244 km$^2$ and the LO-C stock protection solution ([@fig-diff-maps]c) was 33,517 km$^2$. 
 
 The all-NCP and LO-C stock solutions were composed of ca. 9% cropland, with similar crop types present, while the LO-food solution was only 0.7% cropland, which was mainly alfalfa-growing ([@fig-diff-maps]d, @supptbld-sol-diffs). The all-NCP solution had slightly lower inclusion of rangelands and slightly higher inclusion of forestlands than the LO-C stock solution ([@fig-diff-maps]d, @supptbld-sol-diffs).
 
