@@ -111,13 +111,13 @@ The overarching goal of this study is to develop a framework for systematically 
 
 {{< embed notebooks/study-area-map.qmd#fig-studyarea-2 >}}
 
-The Snake River Plain ecoregion of the United States [@ecoregions] intersects with 26 Idaho counties (109,700 km$^2$). It contains  productive croplands [@freedgood2020], localized yet rapidly growing highly developed urban areas [@census_metro], and public rangelands grazed by livestock ([Figure @fig-studyarea-2]a). This region features two primary ecological zones, the river plain and the shrub steppe, and a diverse range of social systems, from urban and exurban systems to dryland agriculture and rural public lands, that together form a diverse array of social-ecological systems [@aho2022]. A majority (58.1%) of lands in the Snake River Plain are federally owned. About one third of the region (33.9%) is privately owned, of which a small percentage (0.4%) are PALs or other easements ([Figure @fig-studyarea-2]b). We excluded tribal lands (2,628 km$^2$, 2.4% of the study area) from this analysis because they have complex land management and protection systems, where the assumption that the cost of land protection scales with fair market value is not applicable [@middleton2011]. The remaining land tenure categories have different levels of protection that affect NCP persistence (Appendix A).
+The Snake River Plain ecoregion of the United States [@ecoregions] intersects with 26 Idaho counties (109,700 km$^2$). It contains  productive croplands [@freedgood2020], localized yet rapidly growing highly developed urban areas [@census_metro], and public rangelands grazed by livestock ([Figure @fig-studyarea-2]a). This region features two primary ecological zones, the river plain and the shrub steppe, and a diverse range of social systems, from urban and exurban systems to dryland agriculture and rural public lands, that together form a diverse array of social-ecological systems [@aho2022]. A majority (58.1%) of lands in the Snake River Plain are federally owned. About one third of the region (33.9%) is privately owned, of which a small percentage (0.4%) are PALs or other easements ([Figure @fig-studyarea-2]b). We excluded tribal lands (2,628 km$^2$, 2.4% of the study area) from this analysis because they have complex land management and protection systems, where the assumption that the cost of land protection scales with fair market value is not applicable [@middleton2011]. The remaining land tenure categories have different levels of protection that affect NCP persistence (Appendix A.2).
 
 ## Data
 
 ### Land Use
 
-We used Farms Under Threat 2040 land use data [@hunter2022; @theobald2018], which contain agriculture-specific land classes (e.g. cropland, rangeland). They also differentiate lands within low-density residential areas, which we hypothesized would have different NCP than the same types of land cover outside of residential areas (not shown in @fig-studyarea-2, see @sec-land-use-data).
+We used Farms Under Threat 2040 land use data [@hunter2022; @theobald2018], which contain agriculture-specific land classes (e.g. cropland, rangeland). They also differentiate lands within low-density residential areas, which we hypothesized would have different NCP than the same types of land cover outside of residential areas (not shown in @fig-studyarea-2, see @sec-land-use-data). This dataset allowed us to use agriculturally relevant yet generalized land classes for our NCP models for which we could assign relevant NCP estimates. We also implemented the National Land Cover Database [@nlcd] and the Cropland Data Layer [@nass] in models where NCP estimates were available and aligned with these data (see Online Resource B.1 and B.2.2).
 
 ### NCP Data and Models
 
@@ -165,19 +165,19 @@ We calculated the percent of each NCP indicator provided by each land tenure cat
 
 We generated multiple series of systematic conservation planning [SCP] scenarios that use a set of NCP indicators to generate a solution containing priority protection areas. We used the `prioritizr` R package with a Gurobi solver in R [v8.0.3, @hanson2024; v12.0-0, @gurobi]. SCP in `prioritizr` requires, at minimum: (1) an objective function, (2) conservation features to protect, (3) cost of protection, and (4) protection targets (>0% and <100% of each conservation feature). 
 
-We used the minimum set objective function for this analysis, which generates priority areas that acheive conservation targets for each feature at the lowest possible cost. To test sensitivity to features across targets, we used a range of protection targets from 5-75% of each NCP indicator. We also chose 30% as a specific target to examine following global conservation initiatives [@cop15]. 
+We used the minimum set objective function for this analysis, which generates priority areas that acheive conservation targets for each feature at the lowest possible cost. To test sensitivity to features across targets, we used a range of protection targets from 5-75%, incremented by 5%, of each NCP indicator. We also chose 30% as a specific target to examine following global conservation initiatives [@cop15]. 
 
-For conservation features, we used the NCP indicators described above. Few were highly correlated (@suppfigc-corrs), yet reaching protection targets for one indicator can result in protecting others implicitly. Since the use of many features is computationally expensive, we implemented a novel sensitivity analysis to reduce the number of NCP indicators in our SCP scenarios (see @sec-sens-analysis and the workflow diagram @suppfiga-workflow).
+For conservation features, we used the NCP indicators described above. Besides a few highly correlated indicators (the two carbon models, crop provision-crop value, and habitat quality-ecological integrity; @suppfigc-corrs), most NCP were less correlated on a pixel-to-pixel basis. However, reaching protection targets for one indicator can still result in protecting others implicitly. To better understand the main drivers among and uniqueness of the NCP features, we implemented a novel sensitivity analysis to reduce the number of NCP indicators in our SCP scenarios (see @sec-sens-analysis and the workflow diagram @suppfiga-workflow).
 
 ### Selecting features: systematic sensitivity analysis workflow {#sec-sens-analysis}
 
-To reduce NCP indicators in the all-NCP scenario, we ran a series of SCP scenarios in each NCP category. We set NCP protection targets to range from 5-75%, created SCP scenarios for each possible combination of indicators, and calculated a priority areas for each scenario at each target. We also created a full solution for each category that contained all its NCP indicators. We then quantified the spatial dissimilarity between each solution and the full solution for that NCP category and target using Earth Mover's Distance [EMD]. EMD is a spatial similarity measure that supposes each pixel value in raster A is a pile of earth and each pixel value in raster B is a hole. It calculates the effort (distance times amount of earth) need to fill all the "holes" in raster B with the earth in raster A [@roura2010]. A lower EMD indicates that a pair of rasters have a more similar spatial distribution. To assess dissimilarity across targets, we plotted the EMD of each solution at each target and calculated the area under the curve [AUC] (Appendix C). Solutions with the lowest AUC are more similar to the full solution across all targets. For all EMD calculations, we aggregated solutions to 5km as the algorithm could not handle larger matrices, and normalized all solutions so they summed to one. All EMD calculations were performed with the `emdist` R package [v0.3-3, @emdist]. 
+To reduce NCP indicators in the all-NCP scenario, we ran a series of SCP scenarios in each NCP category. We set NCP protection targets to range from 5-75%, incremented by 5%, created SCP scenarios for each possible combination of indicators, and calculated a priority areas network for each scenario at each target. We also created a full solution for each category that contained all its NCP indicators. We then quantified the spatial dissimilarity between each solution and the full solution for that NCP category and target using Earth Mover's Distance [EMD]. EMD is a spatial similarity measure that supposes each pixel value in raster A is a pile of earth and each pixel value in raster B is a hole. It calculates the effort (distance times amount of earth) need to fill all the "holes" in raster B with the earth in raster A [@roura2010]. A lower EMD indicates that a pair of rasters have a more similar spatial distribution. To assess dissimilarity across targets, we plotted the EMD of each solution at each target and calculated the area under the EMD curve [AUC-EMD] (Appendix C). Solutions with the lowest AUC-EMD are more similar to the full solution across all targets. For all EMD calculations, we aggregated solutions to 5km as the algorithm could not handle larger matrices, and normalized all solutions so they summed to one. All EMD calculations were performed with the `emdist` R package [v0.3-3, @emdist]. 
 
-When selecting NCP indicators in each NCP category, we determined that redundant indicators were present if there were solutions with AUC <1000, a threshold based on visual examination of AUC plots (Figures C[-@suppfigc-clim-emd-mit] -- C[-@suppfigc-rec-emd] and @supptblc-habitat-auc). If there were solutions with <1000 AUC, we selected the solution with the lowest AUC and fewest number of included indicators. The NCP indicators not used in the selected scenario were classified as redundant.
+When selecting NCP indicators in each NCP category, we determined that redundant indicators were present if there were solutions with AUC-EMD <1000, a threshold based on visual examination of AUC-EMD plots (Figures C[-@suppfigc-clim-emd-mit] -- C[-@suppfigc-rec-emd] and @supptblc-habitat-auc). If there were solutions with <1000 AUC-EMD, we selected the solution with the lowest AUC-EMD and fewest number of included indicators. The NCP indicators not used in the selected scenario were classified as redundant.
 
 ### Influential NCP
 
-To identify the most influential NCP in our solution, we performed a similar sensitivity analysis to the workflow described in @sec-sens-analysis. We compared scenarios that left out one NCP indicator or one entire NCP category to the solution with all indicators and categories (the all-NCP solution). A higher AUC value indicates the missing NCP indicator or NCP category is more influential.
+To identify the most influential NCP in our solution, we performed a similar sensitivity analysis to the workflow described in @sec-sens-analysis. We compared scenarios that left out one NCP indicator or one entire NCP category to the solution with all indicators and categories (the all-NCP solution). A higher AUC-EMD value indicates the missing NCP indicator or NCP category is more influential.
 
 # Results
 
@@ -255,9 +255,9 @@ We used an NCP framework to systematically identify priority lands for protectio
 We used 21 NCP indicators in six NCP categories to estimate NCP across Idaho's Snake River Plain. To answer question 1, we used these 21 data layers along with polygons of land tenure to quantify the amount of NCP in each land tenure category. To answer question 2, we employed a two-part sensitivity analysis (@suppfiga-workflow).
 
 
-The first sensitivity analysis was performed six times, once for each NCP category. In each NCP category, we created a scenario with all NCP indicators and scenarios with each possible combination of NCP indicators. For each scenario, we generated optimal protection solutions that targeted 5-75% of each included NCP. We then compared each solution with the full solution in that NCP category, quantifying their dissimilarity at each target, and calculated the area under the curve [AUC]. We selected NCP indicators from the scenario with a low AUC and fewer NCP indicators to be part of scenario that included all NCP categories.
+The first sensitivity analysis was performed six times, once for each NCP category. In each NCP category, we created a scenario with all NCP indicators and scenarios with each possible combination of NCP indicators. For each scenario, we generated optimal protection solutions that targeted 5-75% of each included NCP. We then compared each solution with the full solution in that NCP category, quantifying their dissimilarity at each target, and calculated the area under the EMD curve [AUC-EMD]. We selected NCP indicators from the scenario with a low AUC-EMD and fewer NCP indicators to be part of scenario that included all NCP categories.
 
-The second sensitivity analysis was performed once. We created a scenario with the 14 NCP indicators selected in the first sensitivity analysis, and scenarios in which one NCP indicator or one NCP category was removed. Again, for each scenario, we generated optimal protection solutions that targeted 5-75% of each included NCP. We then compared each solution with the all-NCP solution, quantifying their dissimilarity at each target, and calculated the AUC. The most dissimilar solutions, those with the highest AUC, revealed which NCP were most influential to the all-NCP solution.
+The second sensitivity analysis was performed once. We created a scenario with the 14 NCP indicators selected in the first sensitivity analysis, and scenarios in which one NCP indicator or one NCP category was removed. Again, for each scenario, we generated optimal protection solutions that targeted 5-75% of each included NCP. We then compared each solution with the all-NCP solution, quantifying their dissimilarity at each target, and calculated the AUC-EMD. The most dissimilar solutions, those with the highest AUC-EMD, revealed which NCP were most influential to the all-NCP solution.
 
 ::: {#suppfiga-workflow width=90%}
 
@@ -508,7 +508,7 @@ Pearson correlation coefficients between each NCP indicator. Very few (5 pairs) 
 
 {{< embed notebooks/clim-sens-analysis.qmd#fig-clim-emd-mit >}}
 
-We measured the Earth Mover's Distance [EMD] between every possible combination of our three C stock protection indicators and the optimal solution using all three indicators the "full solution") at different protection targets. The solutions with the lowest area under the EMD curve [AUC], showing that they are closest to the full solution across all targets, are depicted in purple. The table reports the AUC values for the closest solutions as well as the indicators that these solutions omit. The EMDs of the other solutions are shown in gray. 
+We measured the Earth Mover's Distance [EMD] between every possible combination of our three C stock protection indicators and the optimal solution using all three indicators the "full solution") at different protection targets. The solutions with the lowest area under the EMD curve [AUC-EMD], showing that they are closest to the full solution across all targets, are depicted in purple. The table reports the AUC-EMD values for the closest solutions as well as the indicators that these solutions omit. The EMDs of the other solutions are shown in gray. 
 
 :::
 
@@ -516,7 +516,7 @@ We measured the Earth Mover's Distance [EMD] between every possible combination 
 
 {{< embed notebooks/clim-sens-analysis.qmd#fig-clim-emd-adap >}}
 
-We measured the Earth Mover's Distance [EMD] between each solution for our two climate adaptation indicators and the optimal solution using both indicators (the "full solution") at different protection targets. The EMD of each solution to the full solution is depicted in purple. The table reports the AUC values for the closest solutions as well as the inputs that these solutions omit.
+We measured the Earth Mover's Distance [EMD] between each solution for our two climate adaptation indicators and the optimal solution using both indicators (the "full solution") at different protection targets. The EMD of each solution to the full solution is depicted in purple. The table reports the AUC-EMD values for the closest solutions as well as the inputs that these solutions omit.
 
 :::
 
@@ -524,7 +524,7 @@ We measured the Earth Mover's Distance [EMD] between each solution for our two c
 
 {{< embed notebooks/food-sens-analysis.qmd#fig-food-emd >}}
 
-We measured the Earth Mover's Distance [EMD] between every possible combination of our four food and feed indicators and the optimal solution using all four indicators (the "full solution") at different protection targets. The solutions with the lowest area under the EMD curve [AUC], showing that they are closest to the full solution across all targets, are depicted in purple. The table reports the AUC values for the closest solutions as well as the inputs that these solutions omit. The EMDs of the other solutions are shown in gray. 
+We measured the Earth Mover's Distance [EMD] between every possible combination of our four food and feed indicators and the optimal solution using all four indicators (the "full solution") at different protection targets. The solutions with the lowest area under the EMD curve [AUC-EMD], showing that they are closest to the full solution across all targets, are depicted in purple. The table reports the AUC-EMD values for the closest solutions as well as the inputs that these solutions omit. The EMDs of the other solutions are shown in gray. 
 
 :::
 
@@ -532,7 +532,7 @@ We measured the Earth Mover's Distance [EMD] between every possible combination 
 
 {{< embed notebooks/waterqual-sens-analysis.qmd#fig-watqual-emd >}}
 
-We measured the Earth Mover's Distance [EMD] between each solution for our two water quality indicators and the optimal solution using both indicators (the "full solution") at different protection targets. The EMD of each solution to the full solution is shown in purple. The table reports the AUC values for both solutions as well as the inputs that these solutions omit.
+We measured the Earth Mover's Distance [EMD] between each solution for our two water quality indicators and the optimal solution using both indicators (the "full solution") at different protection targets. The EMD of each solution to the full solution is shown in purple. The table reports the AUC-EMD values for both solutions as well as the inputs that these solutions omit.
 
 :::
 
@@ -540,18 +540,18 @@ We measured the Earth Mover's Distance [EMD] between each solution for our two w
 
 {{< embed notebooks/hab-sens-analysis.qmd#fig-habitat-emd >}}
 
-We measured the Earth Mover's Distance [EMD] between every possible combination of our eight habitat indicators and the optimal solution using all eight indicators (the "full solution") at different protection targets. The solutions with the lowest area under the EMD curve [AUC], showing that they are closest to the full solution across all targets, are depicted in purple. The table reports the AUC values for the closest solutions as well as the inputs that these solutions omit. The EMDs of the other solutions are shown in gray. 
+We measured the Earth Mover's Distance [EMD] between every possible combination of our eight habitat indicators and the optimal solution using all eight indicators (the "full solution") at different protection targets. The solutions with the lowest area under the EMD curve [AUC-EMD], showing that they are closest to the full solution across all targets, are depicted in purple. The table reports the AUC-EMD values for the closest solutions as well as the inputs that these solutions omit. The EMDs of the other solutions are shown in gray. 
 
 :::
 
-Additionally, because there were many habitat indicators, we assessed whether there were low AUC solutions with fewer inputs than shown in the 5 lowest AUC solutions.
+Additionally, because there were many habitat indicators, we assessed whether there were low AUC-EMD solutions with fewer inputs than shown in the 5 lowest AUC-EMD solutions.
 
 \newpage
 ::: {#supptblc-habitat-auc}
 
 {{< embed notebooks/hab-sens-analysis.qmd#tbl-habitat-auc >}}
 
-We measured the Earth Mover's Distance [EMD] between every possible combination of our eight habitat indicators and the optimal solution using all eight indicators at different protection targets (@suppfigc-habitat-emd). This is an expanded table with the lowest AUC values for each number of inputs as well as the indicators included in each solution. Since a lower number of inputs is desired for ease of computation, the solution with a low AUC (<1) and 4 inputs was chosen.
+We measured the Earth Mover's Distance [EMD] between every possible combination of our eight habitat indicators and the optimal solution using all eight indicators at different protection targets (@suppfigc-habitat-emd). This is an expanded table with the lowest AUC-EMD values for each number of inputs as well as the indicators included in each solution. Since a lower number of inputs is desired for ease of computation, the solution with a low AUC-EMD (<1) and 4 inputs was chosen.
 
 :::
 
@@ -559,7 +559,7 @@ We measured the Earth Mover's Distance [EMD] between every possible combination 
 
 {{< embed notebooks/rec-sens-analysis.qmd#fig-rec-emd >}}
 
-We measured the Earth Mover's Distance [EMD] between each solution for our two recreation indicators and the optimal solution using both indicators (the "full solution") at different protection targets. The EMD of each solution to the full solution is shown in purple. The table reports the AUC values for both solutions as well as the inputs that these solutions omit.
+We measured the Earth Mover's Distance [EMD] between each solution for our two recreation indicators and the optimal solution using both indicators (the "full solution") at different protection targets. The EMD of each solution to the full solution is shown in purple. The table reports the AUC-EMD values for both solutions as well as the inputs that these solutions omit.
 
 :::
 

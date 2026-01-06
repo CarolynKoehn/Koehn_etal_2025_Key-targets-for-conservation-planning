@@ -16,7 +16,7 @@ source("get_optim_function.R")
 
 ```{r}
 #| label: fig-redundants
-#| fig-cap: "Results of the sensitivity analysis to identify redundant NCP datasets. For each NCP category, we created a full solution containing all indicators in that category (@tbl-ncp-data) and alternate scenarios with every possible combination of NCP indicators within each category. We then tested the spatial difference (EMD) between the alternate solutions and the full solution. Removal of NCP indicators in some NCP categories had a minute affect on priority area solutions. Solutions that were very similar to the full solution but did not contain all indicators are depicted in blue, with the NCP indicators they omitted noted. We classified these omitted indicators as redundant and did not include them in the all-NCP analysis. Other solutions tested are depicted in gray."
+#| fig-cap: "Results of the sensitivity analysis to identify redundant NCP datasets. For each NCP category, we created a full solution containing all indicators in that category (@tbl-ncp-data) and alternate scenarios with every possible combination of NCP indicators within each category. We then tested the spatial difference (EMD) between the alternate solutions and the full solution. Removal of NCP indicators in some NCP categories had a minute effect on priority area solutions. Solutions that were very similar to the full solution but did not contain all indicators are depicted in blue, with the NCP indicators they omitted noted. We classified these omitted indicators as redundant and did not include them in the all-NCP analysis. Other solutions tested are depicted in gray."
 #| fig-height: 4.75
 #| fig-width: 6.85
 
