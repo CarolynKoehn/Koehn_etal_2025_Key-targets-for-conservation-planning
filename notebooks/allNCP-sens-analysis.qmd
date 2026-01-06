@@ -527,6 +527,109 @@ knitr::kable(sol_diff_tbl_display, digits=1,
 ```
 
 ```{r}
+#| label: fig-diff-maps-food
+#| fig-width: 8
+#| fig-height: 9
+#| fig-cap: 'Differences between the all-NCP solution and the Leave Out Food (No-Food) solution at 30% targets. (a) The All-NCP scenario includes the 14 NCP indicators selected in our sensitivity analysis. (b) The Leave Out Food (No-Food) scenario includes 11 NCP indicators, excluding the 3 selected food indicators. (c) The No-Food solution excludes many lands included in the all-NCP solution and includes some lands that were not chosen in the all-NCP solution. Each solution has different compositions of (d) land use, (e) crops grown in a 5-yr period, and (f) land tenure. See Appendix D.2 for more detail.'
+
+all_layer_plot <- ggplot(as.data.frame(all_layer_diff, xy=TRUE),
+                         aes(x=x, y=y, fill=as.factor(all_layers))) +
+  geom_raster(show.legend = FALSE) +
+  geom_sf(data=aoi, fill=NA, inherit.aes = FALSE) +
+  scale_fill_manual(name = "", values = c("gray95", "#9870c5")) +
+  labs(title = "All-NCP", tag="a") +
+  coord_sf(default_crs = st_crs(aoi)) +
+  theme_void() +
+  theme(plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9))
+
+no_food_plot <- ggplot(as.data.frame(all_layer_diff, xy=TRUE),
+                         aes(x=x, y=y, fill=as.factor(no_food))) +
+  geom_raster(show.legend = FALSE) +
+  geom_sf(data=aoi, fill=NA, inherit.aes = FALSE) +
+  scale_fill_manual(name = "", values = c("gray95", "#E4460AFF")) +
+  labs(title = "Leave Out Food", tag="b") +
+  coord_sf(default_crs = st_crs(aoi)) +
+  theme_void() +
+  theme(plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9))
+
+all_minus_food_plot <- as.data.frame(all_layer_diff, xy=TRUE) %>%
+  mutate(all_minus_food_cats = ifelse(diff_map %in% c("All Solutions", "All-NCP and No Food"),
+                                      yes = "Selected in both solutions", 
+                                      no = ifelse(diff_map %in% c("Only No Food", "No Food and No C Stock Protection"), 
+                                                  yes = "Added in No-Food", 
+                                                  no = ifelse(diff_map == "No Solutions", 
+                                                              yes = "Not selected", 
+                                                              no = "Excluded in No-Food")))) %>%
+  ggplot(aes(x=x, y=y, fill=as.factor(all_minus_food_cats))) +
+  geom_raster() +
+  geom_sf(data=aoi, fill=NA, inherit.aes = FALSE) +
+  scale_fill_manual(name = "", 
+                    limits = c("Excluded in No-Food",
+                               "Added in No-Food",
+                               "Selected in both solutions",
+                               "Not selected"),
+                    values = c("#9870c5", "#E4460AFF", "gray65", "gray95")) +
+  labs(title = "Solution Differences", tag="c") +
+  coord_sf(default_crs = st_crs(aoi)) +
+  theme_void() +
+  theme(plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9))
+
+diff_plot_landuse <- subset(sol_diffs_plot, 
+                            diff %in% c("Cropland", "Pastureland", "Rangeland", "Forestland") &
+                              category %in% c("All-NCP", "No-Food")) %>%
+  mutate(diff = factor(diff, levels = c("Pastureland", "Forestland", "Cropland", "Rangeland"))) %>%
+  ggplot() +
+  geom_col(aes(x=category, y=value, fill=diff), position="dodge") +
+  # geom_tile(aes(x=category, color=category, y=50, height=100, width=0.95), fill=NA, linewidth=1, show.legend = F) +
+  labs(x="", y="Percent Land", tag="d") +
+  scale_fill_manual(limits = c("Rangeland", "Cropland", "Forestland", "Pastureland"),
+                    values = c("#e2c85f", "#02682c", "#ac9e8d", "#61aa36"),
+                    name = "Land Use") +
+  # scale_color_manual(values = c("#9870c5", "#E4460AFF")) +
+  scale_y_continuous(expand = expansion(mult=c(0,0.05))) +
+  theme_classic() +
+  theme(plot.tag = element_text(),
+        plot.tag.location = "plot",
+        plot.tag.position = c(0.95, 0.9))
+
+diff_plot_crops <- subset(sol_diffs_plot, 
+                          diff %in% c("Corn", "Barley", "SpringWheat", "WinterWheat", "Alfalfa", "Sugarbeets", "Potatoes", "Fallow/IdleCropland") &
+                              category %in% c("All-NCP", "No-Food")) %>%
+  mutate(diff = factor(diff, levels = rev(c("Alfalfa", "Barley", "Potatoes", "Corn", "SpringWheat", "WinterWheat", "Sugarbeets", "Fallow/IdleCropland")))) %>%
+  ggplot() +
+  geom_col(aes(x=category, y=value, fill=diff), position="dodge") +
+  # geom_tile(aes(x=category, color=category, y=2, height=4, width=0.95), fill=NA, linewidth=1, show.legend = F) +
+  labs(x="", y="Percent Land", tag="e") +
+  scale_fill_manual(values = c("#ffa5e2", "#e2007c", "#702600", "#ffd300", "#d8b56b", "#a57000", "#a800e2", "#bfbf77", "#a5f28c", "#a50000", "#d69ebc"),
+                    limits = c("Alfalfa", "Barley", "Potatoes", "Corn", "SpringWheat", "WinterWheat", "Sugarbeets", "Fallow/IdleCropland"),
+                    labels = c("Alfalfa", "Barley", "Potatoes", "Corn", "Spring Wheat", "Winter Wheat", "Sugarbeets", "Fallow/Idle\nCropland"),
+                    name = "Crops Grown\n(5-yr period)") +
+  # scale_color_manual(values = c("#9870c5", "#E4460AFF", "#1AE4B6FF")) +
+  scale_y_continuous(expand = expansion(mult=c(0,0.05))) +
+  theme_classic() +
+  theme(plot.tag = element_text(),
+        plot.tag.location = "plot",
+        plot.tag.position = c(0.95, 0.9))
+
+layout <- "
+AAADD
+BBBEE
+CCCCF
+"
+
+all_layer_plot + no_food_plot + all_minus_food_plot + diff_plot_landuse + diff_plot_crops + grid::textGrob(paste0("Solution Cost:\n\U1F847", round(sol_diff_tbl_display["PercCostReduction", "no_food"], 0), "%"))  + plot_layout(design=layout)
+```
+
+
+<!--
+
+```{r}
 #| label: fig-diff-maps
 #| fig-width: 8
 #| fig-height: 9
@@ -644,6 +747,8 @@ C#F
 
 all_layer_plot + no_food_plot + no_clim_plot + diff_plot_landuse + diff_plot_crops + diff_plot_tenure  + plot_layout(design=layout, widths=c(1,0.1,1))
 ```
+
+-->
 
 Save as image:
 
