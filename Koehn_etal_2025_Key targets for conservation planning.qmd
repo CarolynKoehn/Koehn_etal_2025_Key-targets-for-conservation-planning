@@ -199,13 +199,15 @@ The all-NCP solution was most sensitive to two NCP categories: (a) food and feed
 
 {{< embed notebooks/allNCP-sens-analysis.qmd#fig-loo-emd >}}
 
-{{< embed notebooks/allNCP-sens-analysis.qmd#fig-diff-maps >}}
+{{< embed notebooks/allNCP-sens-analysis.qmd#fig-diff-maps-food >}}
 
-Since the all-NCP solution was most sensitive to food and C stock protection NCP, we compared the outcomes of these dissimilar solutions when these NCP were left out (@fig-diff-maps, @supptbld-sol-diffs). The all-NCP solution ([@fig-diff-maps]a) was 33,677 km$^2$, while the Leave Out (LO) Food solution ([@fig-diff-maps]b) was 34,244 km$^2$ and the LO-C stock protection solution ([@fig-diff-maps]c) was 33,517 km$^2$. 
+{{< embed notebooks/allNCP-sens-analysis.qmd#fig-diff-maps-carbon >}}
 
-The all-NCP and LO-C stock solutions were composed of ca. 9% cropland, with similar crop types present, while the LO-food solution was only 0.7% cropland, which was mainly alfalfa-growing ([@fig-diff-maps]d, @supptbld-sol-diffs). The all-NCP solution had slightly lower inclusion of rangelands and slightly higher inclusion of forestlands than the LO-C stock solution ([@fig-diff-maps]d, @supptbld-sol-diffs).
+Since the all-NCP solution was most sensitive to food and C stock protection NCP, we compared the outcomes of these dissimilar solutions when these NCP were left out (Figures [-@fig-diff-maps-food]-[-@fig-diff-maps-carbon], @supptbld-sol-diffs). The all-NCP solution ([@fig-diff-maps-food]a) was 33,677 km$^2$, while the Leave Out (LO) Food solution ([@fig-diff-maps-food]b) was 34,244 km$^2$ and the LO-C stock protection solution ([@fig-diff-maps-carbon]b) was 33,517 km$^2$. 
 
-The all-NCP and LO-C stock solutions were composed of less federal lands (59.1% and 58.8%, respectively) than the no-food solution (74.7%, [@fig-diff-maps]f, @supptbld-sol-diffs). Unprotected private lands were included in all solutions, but were especially present in solutions that protect food NCP.
+The all-NCP and LO-C stock solutions were composed of ca. 9% cropland, with similar crop types present ([@fig-diff-maps-carbon]d-e, @supptbld-sol-diffs), while the LO-food solution was only 0.7% cropland, which was mainly alfalfa-growing ([@fig-diff-maps-food]d-e, @supptbld-sol-diffs). The all-NCP solution had slightly lower inclusion of rangelands and slightly higher inclusion of forestlands than the LO-C stock solution ([@fig-diff-maps-carbon]d, @supptbld-sol-diffs).
+
+The all-NCP and LO-C stock solutions were composed of less federal lands (59.1% and 58.8%, respectively) than the no-food solution (74.7%, @supptbld-sol-diffs). Unprotected private lands were included in all solutions, but were especially present in solutions that protect food NCP.
 
 The total fair market value of lands in the LO-food solution (\$7.48B) was 22% less than the all-NCP solution (\$9.64B), while the total value of lands in the LO-C stock solution (\$9.43B) was only 2% less than the all-NCP solution. Food is included as a target NCP in establishing PALs, so these extra costs are accepted implicitly, but the addition of climate goals would result in relatively little extra investment from institutions.
 

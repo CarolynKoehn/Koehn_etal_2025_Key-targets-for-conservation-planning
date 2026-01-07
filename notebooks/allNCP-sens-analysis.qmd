@@ -498,6 +498,97 @@ desc.df <- cost.df %>%
   mutate(category = rownames(.)) %>%
   left_join(desc.df, .)
 
+# NCP protected
+## soil organic carbon
+sol_soc_diff <- sapply(cat_vect, function(x) {
+  return(sum(values(mask(allNCP_rasts$SOC, x), na.rm=TRUE)))
+})
+
+perc_soc_to_all_layer <- ((sol_soc_diff["all_layers"]-sol_soc_diff)/abs(sol_soc_diff["all_layers"]))*100
+perc_soc_to_all_layer[c(4:length(perc_soc_to_all_layer))] <- NA
+perc_soc_to_all_solutions <- (sol_soc_diff/sol_soc_diff["All Solutions"])*100
+perc_soc_to_all_solutions[c(1:3,11)] <- NA
+perc_soc_to_all_solutions[4] <- 0
+
+soc.df <- cbind(as.data.frame(sol_soc_diff), as.data.frame(perc_soc_to_all_layer), as.data.frame(perc_soc_to_all_solutions))
+colnames(soc.df) <- c("SolutionSOC", "PercSOCReduction", "PercSOCAddition")
+
+desc.df <- soc.df %>%
+  mutate(category = rownames(.)) %>%
+  left_join(desc.df, .)
+## carbon storage
+sol_cstor_diff <- sapply(cat_vect, function(x) {
+  return(sum(values(mask(allNCP_rasts$CStorage, x), na.rm=TRUE)))
+})
+
+perc_cstor_to_all_layer <- ((sol_cstor_diff["all_layers"]-sol_cstor_diff)/abs(sol_cstor_diff["all_layers"]))*100
+perc_cstor_to_all_layer[c(4:length(perc_cstor_to_all_layer))] <- NA
+perc_cstor_to_all_solutions <- (sol_cstor_diff/sol_cstor_diff["All Solutions"])*100
+perc_cstor_to_all_solutions[c(1:3,11)] <- NA
+perc_cstor_to_all_solutions[4] <- 0
+
+cstor.df <- cbind(as.data.frame(sol_cstor_diff), as.data.frame(perc_cstor_to_all_layer), as.data.frame(perc_cstor_to_all_solutions))
+colnames(cstor.df) <- c("SolutionCStor", "PercCStorReduction", "PercCStorAddition")
+
+desc.df <- cstor.df %>%
+  mutate(category = rownames(.)) %>%
+  left_join(desc.df, .)
+
+## crop provision
+sol_cropprov_diff <- sapply(cat_vect, function(x) {
+  return(sum(values(mask(allNCP_rasts$CropProv, x), na.rm=TRUE)))
+})
+
+perc_cropprov_to_all_layer <- ((sol_cropprov_diff["all_layers"]-sol_cropprov_diff)/abs(sol_cropprov_diff["all_layers"]))*100
+perc_cropprov_to_all_layer[c(4:length(perc_cropprov_to_all_layer))] <- NA
+perc_cropprov_to_all_solutions <- (sol_cropprov_diff/sol_cropprov_diff["All Solutions"])*100
+perc_cropprov_to_all_solutions[c(1:3,11)] <- NA
+perc_cropprov_to_all_solutions[4] <- 0
+
+cropprov.df <- cbind(as.data.frame(sol_cropprov_diff), as.data.frame(perc_cropprov_to_all_layer), as.data.frame(perc_cropprov_to_all_solutions))
+colnames(cropprov.df) <- c("SolutionCropProv", "PercCropProvReduction", "PercCropProvAddition")
+
+desc.df <- cropprov.df %>%
+  mutate(category = rownames(.)) %>%
+  left_join(desc.df, .)
+## livestock crop provision
+sol_lvstckcropprov_diff <- sapply(cat_vect, function(x) {
+  return(sum(values(mask(allNCP_rasts$LvstckCropProv, x), na.rm=TRUE)))
+})
+
+perc_lvstckcropprov_to_all_layer <- ((sol_lvstckcropprov_diff["all_layers"]-sol_lvstckcropprov_diff)/abs(sol_lvstckcropprov_diff["all_layers"]))*100
+perc_lvstckcropprov_to_all_layer[c(4:length(perc_lvstckcropprov_to_all_layer))] <- NA
+perc_lvstckcropprov_to_all_solutions <- (sol_lvstckcropprov_diff/sol_lvstckcropprov_diff["All Solutions"])*100
+perc_lvstckcropprov_to_all_solutions[c(1:3,11)] <- NA
+perc_lvstckcropprov_to_all_solutions[4] <- 0
+
+lvstckcropprov.df <- cbind(as.data.frame(sol_lvstckcropprov_diff), as.data.frame(perc_lvstckcropprov_to_all_layer), as.data.frame(perc_lvstckcropprov_to_all_solutions))
+colnames(lvstckcropprov.df) <- c("SolutionLvstckCropProv", "PercLvstckCropProvReduction", "PercLvstckCropProvAddition")
+
+desc.df <- lvstckcropprov.df %>%
+  mutate(category = rownames(.)) %>%
+  left_join(desc.df, .)
+## ag land quality
+sol_pvr_diff <- sapply(cat_vect, function(x) {
+  return(sum(values(mask(allNCP_rasts$AgPoten, x), na.rm=TRUE)))
+})
+
+perc_pvr_to_all_layer <- ((sol_pvr_diff["all_layers"]-sol_pvr_diff)/abs(sol_pvr_diff["all_layers"]))*100
+perc_pvr_to_all_layer[c(4:length(perc_pvr_to_all_layer))] <- NA
+perc_pvr_to_all_solutions <- (sol_pvr_diff/sol_pvr_diff["All Solutions"])*100
+perc_pvr_to_all_solutions[c(1:3,11)] <- NA
+perc_pvr_to_all_solutions[4] <- 0
+
+pvr.df <- cbind(as.data.frame(sol_pvr_diff), as.data.frame(perc_pvr_to_all_layer), as.data.frame(perc_pvr_to_all_solutions))
+colnames(pvr.df) <- c("SolutionPVR", "PercPVRReduction", "PercPVRAddition")
+
+desc.df <- pvr.df %>%
+  mutate(category = rownames(.)) %>%
+  left_join(desc.df, .)
+
+desc.df <- desc.df %>%
+  mutate(across(ends_with("Reduction"), ~.x*-1))
+
 write_csv(desc.df, "../data/sol30_differences.csv")
 ```
 
@@ -514,11 +605,12 @@ sol_diffs_plot <- sol_diffs_table %>%
 
 sol_diff_tbl_display <- sol_diffs_table %>%
   filter(category %in% c("all_layers", "no_food", "no_climmit")) %>%
+  select(-c(SolutionCStor, SolutionSOC, SolutionCropProv, SolutionLvstckCropProv, SolutionPVR)) %>%
   column_to_rownames(var = "category") %>%
   t() %>%
   as.data.frame() %>%
   na.omit() %>%
-  mutate(Attribute = c("Area (sq km)", "Percent cropland", "Percent pastureland", "Percent rangeland", "Percent forestland", "Percent federal land", "Percent private land", "Percent state land", "Percent PAL", "Percent other easements", "Percent corn-growing land", "Percent barley-growing land", "Percent spring wheat-growing land", "Percent winter wheat-growing land", "Percent alfalfa-growing land", "Percent other hay-growing land", "Percent sugarbeet-growing land", "Percent dry bean-growing land", "Percent potato-growing land", "Perent fallow land", "Percent triticale-growing land", "Solution Cost (mil USD)", "Percent cost saved by removing NCP"), .before=all_layers)
+  mutate(Attribute = c("Area (sq km)", "Percent cropland", "Percent pastureland", "Percent rangeland", "Percent forestland", "Percent federal land", "Percent private land", "Percent state land", "Percent PAL", "Percent other easements", "Percent corn-growing land", "Percent barley-growing land", "Percent spring wheat-growing land", "Percent winter wheat-growing land", "Percent alfalfa-growing land", "Percent other hay-growing land", "Percent sugarbeet-growing land", "Percent dry bean-growing land", "Percent potato-growing land", "Perent fallow land", "Percent triticale-growing land", "Solution Cost (mil USD)", "Percent cost reduction by removing NCP", "Percent soil organic carbon difference from removing NCP", "Percent carbon storage difference from removing NCP", "Percent crop provision difference from removing NCP", "Percent livestock crop provision difference from removing NCP", "Percent agricultural potential difference from removing NCP"), .before=all_layers)
 
 knitr::kable(sol_diff_tbl_display, digits=1,
              row.names = FALSE,
@@ -530,7 +622,7 @@ knitr::kable(sol_diff_tbl_display, digits=1,
 #| label: fig-diff-maps-food
 #| fig-width: 8
 #| fig-height: 9
-#| fig-cap: 'Differences between the all-NCP solution and the Leave Out Food (No-Food) solution at 30% targets. (a) The All-NCP scenario includes the 14 NCP indicators selected in our sensitivity analysis. (b) The Leave Out Food (No-Food) scenario includes 11 NCP indicators, excluding the 3 selected food indicators. (c) The No-Food solution excludes many lands included in the all-NCP solution and includes some lands that were not chosen in the all-NCP solution. Each solution has different compositions of (d) land use, (e) crops grown in a 5-yr period, and (f) land tenure. See Appendix D.2 for more detail.'
+#| fig-cap: 'Differences between the all-NCP solution and the Leave Out Food (No-Food) solution at 30% targets. (a) The All-NCP scenario includes the 14 NCP indicators selected in our sensitivity analysis. (b) The Leave Out Food (No-Food) scenario includes 11 NCP indicators, excluding the 3 selected food indicators. (c) The No-Food solution excludes many lands included in the all-NCP solution and includes some lands that were not chosen in the all-NCP solution. Each solution has different compositions of (d) land use, (e) crops grown in a 5-yr period, and (f) cost. See Appendix D.2 for more detail.'
 
 all_layer_plot <- ggplot(as.data.frame(all_layer_diff, xy=TRUE),
                          aes(x=x, y=y, fill=as.factor(all_layers))) +
@@ -592,11 +684,12 @@ diff_plot_landuse <- subset(sol_diffs_plot,
                     values = c("#e2c85f", "#02682c", "#ac9e8d", "#61aa36"),
                     name = "Land Use") +
   # scale_color_manual(values = c("#9870c5", "#E4460AFF")) +
-  scale_y_continuous(expand = expansion(mult=c(0,0.05))) +
+  scale_y_continuous(expand = expansion(mult=c(0,0.05)), limits = c(0,86)) +
   theme_classic() +
   theme(plot.tag = element_text(),
         plot.tag.location = "plot",
-        plot.tag.position = c(0.95, 0.9))
+        panel.grid.major.y = element_line(color="gray75"),
+        plot.tag.position = c(0.95, 0.95))
 
 diff_plot_crops <- subset(sol_diffs_plot, 
                           diff %in% c("Corn", "Barley", "SpringWheat", "WinterWheat", "Alfalfa", "Sugarbeets", "Potatoes", "Fallow/IdleCropland") &
@@ -611,19 +704,155 @@ diff_plot_crops <- subset(sol_diffs_plot,
                     labels = c("Alfalfa", "Barley", "Potatoes", "Corn", "Spring Wheat", "Winter Wheat", "Sugarbeets", "Fallow/Idle\nCropland"),
                     name = "Crops Grown\n(5-yr period)") +
   # scale_color_manual(values = c("#9870c5", "#E4460AFF", "#1AE4B6FF")) +
+  scale_y_continuous(expand = expansion(mult=c(0,0.05)), limits = c(0,4)) +
+  theme_classic() +
+  theme(plot.tag = element_text(),
+        plot.tag.location = "plot",
+        panel.grid.major.y = element_line(color="gray75"),
+        plot.tag.position = c(0.95, 0.95))
+
+layout <- "
+AAAAADDD
+AAAAADDD
+AAAAADDD
+BBBBBEEE
+BBBBBEEE
+BBBBBEEE
+CCCCCCFF
+CCCCCCGH
+CCCCCCIJ
+"
+
+all_layer_plot + 
+  no_food_plot + 
+  all_minus_food_plot + 
+  diff_plot_landuse + 
+  diff_plot_crops + 
+  grid::textGrob("No-Food compared to All-NCP:") +
+  grid::textGrob(paste0("Cost:\n\U1F847", round(sol_diff_tbl_display["PercCostReduction", "no_food"], 0)*-1, "%")) +
+  grid::textGrob(paste0("Crop\nProvision:\n\U1F847", round(sol_diff_tbl_display["PercCropProvReduction", "no_food"], 0)*-1, "%")) +
+  grid::textGrob(paste0("Livestock\nCrop\nProvision:\n\U1F847", round(sol_diff_tbl_display["PercLvstckCropProvReduction", "no_food"], 0)*-1, "%")) +
+  grid::textGrob(paste0("Agricultural\nPotential:\n\U1F847", round(sol_diff_tbl_display["PercPVRReduction", "no_food"], 0)*-1, "%")) +
+  plot_layout(design=layout, 
+              widths=c(1,1,1,1,1,0.5,1.3,1),
+              heights = rep(c(0.1,1,1), 3))
+```
+
+```{r}
+#| label: fig-diff-maps-carbon
+#| fig-width: 8
+#| fig-height: 9
+#| fig-cap: 'Differences between the all-NCP solution and the Leave Out C Stock Protection (No-C Stock Protection) solution at 30% targets. (a) The All-NCP scenario includes the 14 NCP indicators selected in our sensitivity analysis. (b) The No-C Stock Protection scenario includes 12 NCP indicators, excluding the 2 selected C stock protection indicators. (c) The No-C Stock Protection solution excludes many lands included in the all-NCP solution and includes some lands that were not chosen in the all-NCP solution. Each solution has different compositions of (d) land use, (e) crops grown in a 5-yr period, and (f) cost. See Appendix D.2 for more detail.'
+
+all_layer_plot <- ggplot(as.data.frame(all_layer_diff, xy=TRUE),
+                         aes(x=x, y=y, fill=as.factor(all_layers))) +
+  geom_raster(show.legend = FALSE) +
+  geom_sf(data=aoi, fill=NA, inherit.aes = FALSE) +
+  scale_fill_manual(name = "", values = c("gray95", "#9870c5")) +
+  labs(title = "All-NCP", tag="a") +
+  coord_sf(default_crs = st_crs(aoi)) +
+  theme_void() +
+  theme(plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9))
+
+no_clim_plot <- ggplot(as.data.frame(all_layer_diff, xy=TRUE),
+                         aes(x=x, y=y, fill=as.factor(no_climmit))) +
+  geom_raster(show.legend = FALSE) +
+  geom_sf(data=aoi, fill=NA, inherit.aes = FALSE) +
+  scale_fill_manual(name = "", values = c("gray95", "#1AE4B6FF")) +
+  labs(title = "Leave Out C Stock Protection", tag="c") +
+  coord_sf(default_crs = st_crs(aoi)) +
+  theme_void() +
+  theme(plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9))
+
+all_minus_clim_plot <- as.data.frame(all_layer_diff, xy=TRUE) %>%
+  mutate(all_minus_food_cats = ifelse(diff_map %in% c("All Solutions", "All-NCP and No C Stock Protection"),
+                                      yes = "Selected in both solutions", 
+                                      no = ifelse(diff_map %in% c("Only No C Stock Protection", "No Food and No C Stock Protection"), 
+                                                  yes = "Added in No-C stock protection", 
+                                                  no = ifelse(diff_map == "No Solutions", 
+                                                              yes = "Not selected", 
+                                                              no = "Excluded in No-C stock protection")))) %>%
+  ggplot(aes(x=x, y=y, fill=as.factor(all_minus_food_cats))) +
+  geom_raster() +
+  geom_sf(data=aoi, fill=NA, inherit.aes = FALSE) +
+  scale_fill_manual(name = "", 
+                    limits = c("Excluded in No-C stock protection",
+                               "Added in No-C stock protection",
+                               "Selected in both solutions",
+                               "Not selected"),
+                    values = c("#9870c5", "#1AE4B6FF", "gray65", "gray95")) +
+  labs(title = "Solution Differences", tag="c") +
+  coord_sf(default_crs = st_crs(aoi)) +
+  theme_void() +
+  theme(plot.tag = element_text(),
+        plot.tag.location = "panel",
+        plot.tag.position = c(0.9, 0.9))
+
+diff_plot_landuse <- subset(sol_diffs_plot, 
+                            diff %in% c("Cropland", "Pastureland", "Rangeland", "Forestland") &
+                              category %in% c("All-NCP", "No-C Stock\nProtection")) %>%
+  mutate(diff = factor(diff, levels = c("Pastureland", "Forestland", "Cropland", "Rangeland"))) %>%
+  ggplot() +
+  geom_col(aes(x=category, y=value, fill=diff), position="dodge") +
+  # geom_tile(aes(x=category, color=category, y=50, height=100, width=0.95), fill=NA, linewidth=1, show.legend = F) +
+  labs(x="", y="Percent Land", tag="d") +
+  scale_fill_manual(limits = c("Rangeland", "Cropland", "Forestland", "Pastureland"),
+                    values = c("#e2c85f", "#02682c", "#ac9e8d", "#61aa36"),
+                    name = "Land Use") +
+  # scale_color_manual(values = c("#9870c5", "#E4460AFF")) +
   scale_y_continuous(expand = expansion(mult=c(0,0.05))) +
   theme_classic() +
   theme(plot.tag = element_text(),
         plot.tag.location = "plot",
-        plot.tag.position = c(0.95, 0.9))
+        panel.grid.major.y = element_line(color="gray75"),
+        plot.tag.position = c(0.95, 0.95))
+
+diff_plot_crops <- subset(sol_diffs_plot, 
+                          diff %in% c("Corn", "Barley", "SpringWheat", "WinterWheat", "Alfalfa", "Sugarbeets", "Potatoes", "Fallow/IdleCropland") &
+                              category %in% c("All-NCP", "No-C Stock\nProtection")) %>%
+  mutate(diff = factor(diff, levels = rev(c("Alfalfa", "Barley", "Potatoes", "Corn", "SpringWheat", "WinterWheat", "Sugarbeets", "Fallow/IdleCropland")))) %>%
+  ggplot() +
+  geom_col(aes(x=category, y=value, fill=diff), position="dodge") +
+  # geom_tile(aes(x=category, color=category, y=2, height=4, width=0.95), fill=NA, linewidth=1, show.legend = F) +
+  labs(x="", y="Percent Land", tag="e") +
+  scale_fill_manual(values = c("#ffa5e2", "#e2007c", "#702600", "#ffd300", "#d8b56b", "#a57000", "#a800e2", "#bfbf77", "#a5f28c", "#a50000", "#d69ebc"),
+                    limits = c("Alfalfa", "Barley", "Potatoes", "Corn", "SpringWheat", "WinterWheat", "Sugarbeets", "Fallow/IdleCropland"),
+                    labels = c("Alfalfa", "Barley", "Potatoes", "Corn", "Spring Wheat", "Winter Wheat", "Sugarbeets", "Fallow/Idle\nCropland"),
+                    name = "Crops Grown\n(5-yr period)") +
+  # scale_color_manual(values = c("#9870c5", "#E4460AFF", "#1AE4B6FF")) +
+  scale_y_continuous(expand = expansion(mult=c(0,0.05)), limits = c(0,4)) +
+  theme_classic() +
+  theme(plot.tag = element_text(),
+        plot.tag.location = "plot",
+        panel.grid.major.y = element_line(color="gray75"),
+        plot.tag.position = c(0.95, 0.95))
 
 layout <- "
-AAAADD
-BBBBEE
-CCCCCF
+AAAAADDDD
+AAAAADDDD
+BBBBBEEEE
+BBBBBEEEE
+CCCCCCFHI
+CCCCCCJKL
 "
 
-all_layer_plot + no_food_plot + all_minus_food_plot + diff_plot_landuse + diff_plot_crops + grid::textGrob(paste0("No-Food Cost\ncompared to All-NCP:\n\U1F847", round(sol_diff_tbl_display["PercCostReduction", "no_food"], 0), "%"))  + plot_layout(design=layout, widths=c(1,1,1,0.5,1,1))
+all_layer_plot + 
+  no_clim_plot + 
+  all_minus_clim_plot + 
+  diff_plot_landuse + 
+  diff_plot_crops +
+  free(wrap_elements(grid::textGrob("No-C Stock\nProtection compared\nto All-NCP:"))) +
+  plot_spacer() +
+  grid::textGrob(paste0("Cost:\n\U1F847", round(sol_diff_tbl_display["PercCostReduction", "no_food"], 0)*-1, "%")) +
+  grid::textGrob(paste0("Soil\nOrganic\nCarbon:\n\U1F847", round(sol_diff_tbl_display["PercSOCReduction", "no_climmit"], 0)*-1, "%")) +
+  plot_spacer() +
+  grid::textGrob(paste0("Carbon\nStorage:\n\U1F847", round(sol_diff_tbl_display["PercCStorReduction", "no_food"], 0)*-1, "%")) +
+  plot_layout(design=layout, 
+              widths=c(1,1,1,1,1,0.5,1.3,-2,1))
 ```
 
 
