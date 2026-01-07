@@ -623,7 +623,7 @@ BBBBEE
 CCCCCF
 "
 
-all_layer_plot + no_food_plot + all_minus_food_plot + diff_plot_landuse + diff_plot_crops + grid::textGrob(paste0("No-Food Cost\ncompared to All-NCP:\n\U1F847", round(sol_diff_tbl_display["PercCostReduction", "no_food"], 0), "%"))  + plot_layout(design=layout, widths=c(1,1,0.5,1,1))
+all_layer_plot + no_food_plot + all_minus_food_plot + diff_plot_landuse + diff_plot_crops + grid::textGrob(paste0("No-Food Cost\ncompared to All-NCP:\n\U1F847", round(sol_diff_tbl_display["PercCostReduction", "no_food"], 0), "%"))  + plot_layout(design=layout, widths=c(1,1,1,0.5,1,1))
 ```
 
 
