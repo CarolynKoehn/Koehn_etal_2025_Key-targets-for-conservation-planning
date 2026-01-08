@@ -39,3 +39,4 @@ DEM_Filled_Buffered.tif
 /_manuscript
 /figures/Figure*.png
 /figures/*.pptx
+**/*.quarto_ipynb

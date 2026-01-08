@@ -586,6 +586,6 @@ Percent of each NCP indicator provided by each land tenure category. All NCP cat
 
 {{< embed notebooks/allNCP-sens-analysis.qmd#tbl-sol-diffs >}}
 
-Attributes of the all-NCP solution and the "leave-one-out" solutions depicted in @fig-diff-maps
+Attributes of the all-NCP solution and the "leave-one-out" solutions depicted in Figures [-@fig-diff-maps-food]-[-@fig-diff-maps-carbon]
 
 :::

@@ -128,8 +128,8 @@ First, we would like to see which configurations of inputs have the highest diff
 
 ```{r}
 #| label: fig-loo-emd
-#| fig-cap: "Sensitivity of the solution as a function of target protection, measured by Earth Mover's Distance, a spatial similarity measure. The six solutions with the highest area under the Earth Mover’s Distance curve [AUC] are the most influential, and are depicted with colored lines. The legend reports the area under the curve values for these scenarios and the inputs that these scenarios omit. The lower-sensitivity NCP categories are shown in gray."
-#| fig-height: 5.75
+#| fig-cap: "Sensitivity of the solution as a function of target protection, measured by Earth Mover's Distance, a spatial similarity measure. The six solutions with the highest area under the Earth Mover’s Distance curve [AUC-EMD] are the most influential, and are depicted with colored lines. The legend reports the area under the curve values for these scenarios and the inputs that these scenarios omit. The lower-sensitivity NCP categories are shown in gray."
+#| fig-height: 4.75
 #| fig-width: 6.85
 
 emd_series <- read.csv("../data/LOO_emd_series.csv")
@@ -184,20 +184,22 @@ high_auc_series <- high_auc_series %>%
                                "All recreation indicators")))
 
 figure4 <- ggplot(emd_series, aes(x=target, y=emd, group=as.factor(config))) +
-  geom_line(aes(color="Lower AUC solutions\nRange: [0.19, 241.43]")) +
+  geom_line(aes(color="Lower AUC-EMD solutions\nRange: [0.19, 241.43]"),
+            linewidth = 1.25) +
   scale_color_manual(values="gray80", name="",
                      guide = guide_legend(order=2)) +
   ggnewscale::new_scale_color() +
   geom_line(data=filter(emd_series, config %in% high_auc_series$config),
-            aes(color=factor(config, levels=high_auc_series$config))) +
+            aes(color=factor(config, levels=high_auc_series$config)),
+            linewidth = 1.25) +
   scale_x_continuous(limits=c(5,75), breaks=seq(5,75,5),
                      name = "Target (% NCP protected)") +
   scale_y_continuous() +
   scale_color_manual(name = "Leaves Out",
-                       labels = c(paste0(high_auc_series$`Leaves Out`,"\nAUC: ", round(high_auc_series$AUC, 0))[1:4],
-                                  paste0("Climate Stability /\nAll climate adaptation layers\nAUC: ", round(high_auc_series$AUC[5], 0)),
-                                  paste0("Recreation probability\n(Hooftman et al.) /\nAll recreation layers\nAUC: ", round(high_auc_series$AUC[6], 0))),
-                     values = viridisLite::turbo(7, direction=-1)[-1],
+                       labels = c(paste0(high_auc_series$`Leaves Out`,"\nAUC-EMD: ", round(high_auc_series$AUC, 0))[1:4],
+                                  paste0("Climate Stability /\nAll climate adaptation layers\nAUC-EMD: ", round(high_auc_series$AUC[5], 0)),
+                                  paste0("Recreation probability\n(Hooftman et al.) /\nAll recreation layers\nAUC-EMD: ", round(high_auc_series$AUC[6], 0))),
+                     values = scales::pal_brewer(type="qual", palette = "Paired", direction = -1)(6),
                      guide = guide_legend(order=1)) +
   ylab("Difference from all-NCP solution (EMD)") +
   theme_classic() +
@@ -622,7 +624,7 @@ knitr::kable(sol_diff_tbl_display, digits=1,
 #| label: fig-diff-maps-food
 #| fig-width: 8
 #| fig-height: 9
-#| fig-cap: 'Differences between the all-NCP solution and the Leave Out Food (No-Food) solution at 30% targets. (a) The All-NCP scenario includes the 14 NCP indicators selected in our sensitivity analysis. (b) The Leave Out Food (No-Food) scenario includes 11 NCP indicators, excluding the 3 selected food indicators. (c) The No-Food solution excludes many lands included in the all-NCP solution and includes some lands that were not chosen in the all-NCP solution. Each solution has different compositions of (d) land use, (e) crops grown in a 5-yr period, and (f) cost. See Appendix D.2 for more detail.'
+#| fig-cap: 'Differences between the all-NCP solution and the Leave Out Food (No-Food) solution at 30% targets. (a) The All-NCP scenario includes the 14 NCP indicators selected in our sensitivity analysis. (b) The Leave Out Food (No-Food) scenario includes 11 NCP indicators, excluding the 3 selected food indicators. (c) The No-Food solution excludes many lands included in the all-NCP solution and includes some lands that were not chosen in the all-NCP solution. Each solution has different compositions of (d) land use, (e) crops grown in a 5-yr period, cost, and NCP protected. See Appendix D.2 for more detail.'
 
 all_layer_plot <- ggplot(as.data.frame(all_layer_diff, xy=TRUE),
                          aes(x=x, y=y, fill=as.factor(all_layers))) +
@@ -712,15 +714,15 @@ diff_plot_crops <- subset(sol_diffs_plot,
         plot.tag.position = c(0.95, 0.95))
 
 layout <- "
-AAAAADDD
-AAAAADDD
-AAAAADDD
-BBBBBEEE
-BBBBBEEE
-BBBBBEEE
-CCCCCCFF
-CCCCCCGH
-CCCCCCIJ
+AAAAADDDD
+AAAAADDDD
+AAAAADDDD
+BBBBBEEEE
+BBBBBEEEE
+BBBBBEEEE
+CCCCCCFFF
+CCCCCCGHI
+CCCCCCJKL
 "
 
 all_layer_plot + 
@@ -730,19 +732,21 @@ all_layer_plot +
   diff_plot_crops + 
   grid::textGrob("No-Food compared to All-NCP:") +
   grid::textGrob(paste0("Cost:\n\U1F847", round(sol_diff_tbl_display["PercCostReduction", "no_food"], 0)*-1, "%")) +
+  plot_spacer() +
   grid::textGrob(paste0("Crop\nProvision:\n\U1F847", round(sol_diff_tbl_display["PercCropProvReduction", "no_food"], 0)*-1, "%")) +
   grid::textGrob(paste0("Livestock\nCrop\nProvision:\n\U1F847", round(sol_diff_tbl_display["PercLvstckCropProvReduction", "no_food"], 0)*-1, "%")) +
+  plot_spacer() +
   grid::textGrob(paste0("Agricultural\nPotential:\n\U1F847", round(sol_diff_tbl_display["PercPVRReduction", "no_food"], 0)*-1, "%")) +
   plot_layout(design=layout, 
-              widths=c(1,1,1,1,1,0.5,1.3,1),
-              heights = rep(c(0.1,1,1), 3))
+              widths=c(1,1,1,1,1,0.5,1.3,-1.3,1),
+              heights = rep(c(-0.1,0.9,1), 3))
 ```
 
 ```{r}
 #| label: fig-diff-maps-carbon
 #| fig-width: 8
 #| fig-height: 9
-#| fig-cap: 'Differences between the all-NCP solution and the Leave Out C Stock Protection (No-C Stock Protection) solution at 30% targets. (a) The All-NCP scenario includes the 14 NCP indicators selected in our sensitivity analysis. (b) The No-C Stock Protection scenario includes 12 NCP indicators, excluding the 2 selected C stock protection indicators. (c) The No-C Stock Protection solution excludes many lands included in the all-NCP solution and includes some lands that were not chosen in the all-NCP solution. Each solution has different compositions of (d) land use, (e) crops grown in a 5-yr period, and (f) cost. See Appendix D.2 for more detail.'
+#| fig-cap: 'Differences between the all-NCP solution and the Leave Out C Stock Protection (No-C Stock Protection) solution at 30% targets. (a) The All-NCP scenario includes the 14 NCP indicators selected in our sensitivity analysis. (b) The No-C Stock Protection scenario includes 12 NCP indicators, excluding the 2 selected C stock protection indicators. (c) The No-C Stock Protection solution excludes many lands included in the all-NCP solution and includes some lands that were not chosen in the all-NCP solution. Each solution has different compositions of (d) land use, (e) crops grown in a 5-yr period, cost, and NCP protected. See Appendix D.2 for more detail.'
 
 all_layer_plot <- ggplot(as.data.frame(all_layer_diff, xy=TRUE),
                          aes(x=x, y=y, fill=as.factor(all_layers))) +
@@ -845,14 +849,14 @@ all_layer_plot +
   all_minus_clim_plot + 
   diff_plot_landuse + 
   diff_plot_crops +
-  free(wrap_elements(grid::textGrob("No-C Stock\nProtection compared\nto All-NCP:"))) +
+  free(wrap_elements(grid::textGrob("No-C Stock\nProtection\ncompared\nto All-NCP:"))) +
   plot_spacer() +
-  grid::textGrob(paste0("Cost:\n\U1F847", round(sol_diff_tbl_display["PercCostReduction", "no_food"], 0)*-1, "%")) +
+  grid::textGrob(paste0("Cost:\n\U1F847", round(sol_diff_tbl_display["PercCostReduction", "no_climmit"], 0)*-1, "%")) +
   grid::textGrob(paste0("Soil\nOrganic\nCarbon:\n\U1F847", round(sol_diff_tbl_display["PercSOCReduction", "no_climmit"], 0)*-1, "%")) +
   plot_spacer() +
-  grid::textGrob(paste0("Carbon\nStorage:\n\U1F847", round(sol_diff_tbl_display["PercCStorReduction", "no_food"], 0)*-1, "%")) +
+  grid::textGrob(paste0("Carbon\nStorage:\n\U1F847", round(sol_diff_tbl_display["PercCStorReduction", "no_climmit"], 0)*-1, "%")) +
   plot_layout(design=layout, 
-              widths=c(1,1,1,1,1,0.5,1.3,-2,1))
+              widths=c(1,1,1,1,0.8,0.2,2,-1.5,1))
 ```
 
 
