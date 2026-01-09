@@ -177,7 +177,7 @@ When selecting NCP indicators in each NCP category, we determined that redundant
 
 ### Influential NCP
 
-To identify the most influential NCP in our solution, we performed a similar sensitivity analysis to the workflow described in @sec-sens-analysis. We compared scenarios that left out one NCP indicator or one entire NCP category to the solution with all indicators and categories (the all-NCP solution). A higher AUC-EMD value indicates the missing NCP indicator or NCP category is more influential.
+To identify the most influential NCP in our solution, we performed a similar sensitivity analysis to the workflow described in @sec-sens-analysis. We compared scenarios that left out one NCP indicator or one entire NCP category to the solution with all indicators and categories (the all-NCP solution). We determined the most influential NCP indicators and categories by identifying the "leave one out" scenarios with the highest AUC-EMD values.
 
 # Results
 
@@ -195,7 +195,7 @@ For the climate adaptation and recreation NCP categories, removal of any single 
 
 ## Which NCP indicators are the most important drivers of optimal land protection?
 
-The all-NCP solution was most sensitive to two NCP categories: (a) food and feed, especially agricultural potential, and (b) C stock protection (@fig-loo-emd). The all-NCP solution was highly sensitive to inputs when NCP protection targets were lower and less sensitive at higher NCP protection targets, but this relationship was nonlinear. The target chosen affected the sensitivity of the solution to different indicators. For example, the solution was more sensitive to the climate adaptation indicators than the food and feed indicators at targets 5-10%, but was more sensitive to the food and feed indicators than the climate adaptation indicators at targets 15-75% (@fig-loo-emd).
+The all-NCP solution was most sensitive to two NCP categories: (a) food and feed, especially agricultural potential, and (b) C stock protection, especially soil organic carbon (@fig-loo-emd). The all-NCP solution was highly sensitive to inputs when NCP protection targets were lower and less sensitive at higher NCP protection targets, but this relationship was nonlinear. The target chosen affected the sensitivity of the solution to different indicators. For example, the solution was more sensitive to the climate adaptation indicators than the food and feed indicators at targets 5-10%, but was more sensitive to the food and feed indicators than the climate adaptation indicators at targets 15-75% (@fig-loo-emd).
 
 {{< embed notebooks/allNCP-sens-analysis.qmd#fig-loo-emd >}}
 
@@ -210,6 +210,8 @@ The all-NCP and LO-C stock solutions were composed of ca. 9% cropland, with simi
 The all-NCP and LO-C stock solutions were composed of less federal lands (59.1% and 58.8%, respectively) than the no-food solution (74.7%, @supptbld-sol-diffs). Unprotected private lands were included in all solutions, but were especially present in solutions that protect food NCP.
 
 The total fair market value of lands in the LO-food solution (\$7.48B) was 22% less than the all-NCP solution (\$9.64B), while the total value of lands in the LO-C stock solution (\$9.43B) was only 2% less than the all-NCP solution. Food is included as a target NCP in establishing PALs, so these extra costs are accepted implicitly, but the addition of climate goals would result in relatively little extra investment from institutions.
+
+When NCP were removed from scenarios, less of those NCP were protected, but the extent of protection was variable. In the LO-food solution, food and feed NCP were 27-97% less protected (@fig-diff-maps-food), while in the LO-C stock protection solution, C stock protection NCP were 1-9% less protected.
 
 # Discussion
 
@@ -227,7 +229,7 @@ Surprisingly, we also found that second to food and feed NCP, C stock protection
 
 ## Sensitivity analysis workflow
 
-In our study, the sensitivity analysis was critical to identify both redundant and influential NCP indicators in our SCP analysis. Removing redundant inputs created a simpler all-NCP scenario and reduced the computational resources needed to solve it. The sensitivity analysis then revealed the most influential drivers of SCP solutions, which allowed us to quantify the impact of each influential driver on solutions. 
+In our study, the sensitivity analysis was critical to identify both redundant and influential NCP indicators in our SCP analysis. Removing redundant inputs created a simpler all-NCP scenario so that the main drivers among and uniqueness of the NCP features could be better understood. The sensitivity analysis then revealed the most influential drivers of SCP solutions, which allowed us to quantify the impact of each influential driver on solutions. 
 
 The vast majority of SCP research does not conduct a sensitivity analysis [@velazco2020; @neuendorf2018assessing]. This is problematic because SCP results may be assumed to be fact even if their predicted protection outcomes are impossible, and implementing these uninformed decisions can lead to inefficient investments and environmental and human harm [@neuendorf2018assessing]. Sensitivity analyses overcome these problems by communicating model behavior and increasing transparency in conservation planning [@neuendorf2018assessing]. SCP assumes the input layers (here, the NCP data) are accurate; however, input layers have different levels of uncertainty. Our sensitivity analysis can be used as a first assessment of solution uncertainty. If the most influential layers are highly uncertain, the solution will also have high uncertainty. In these cases, additional methods that deal with uncertainty in SCP, such as Monte Carlo analysis, are necessary [@neuendorf2018assessing].
 
@@ -259,7 +261,7 @@ We used 21 NCP indicators in six NCP categories to estimate NCP across Idaho's S
 
 The first sensitivity analysis was performed six times, once for each NCP category. In each NCP category, we created a scenario with all NCP indicators and scenarios with each possible combination of NCP indicators. For each scenario, we generated optimal protection solutions that targeted 5-75% of each included NCP. We then compared each solution with the full solution in that NCP category, quantifying their dissimilarity at each target, and calculated the area under the EMD curve [AUC-EMD]. We selected NCP indicators from the scenario with a low AUC-EMD and fewer NCP indicators to be part of scenario that included all NCP categories.
 
-The second sensitivity analysis was performed once. We created a scenario with the 14 NCP indicators selected in the first sensitivity analysis, and scenarios in which one NCP indicator or one NCP category was removed. Again, for each scenario, we generated optimal protection solutions that targeted 5-75% of each included NCP. We then compared each solution with the all-NCP solution, quantifying their dissimilarity at each target, and calculated the AUC-EMD. The most dissimilar solutions, those with the highest AUC-EMD, revealed which NCP were most influential to the all-NCP solution.
+The second sensitivity analysis was performed once. We created a scenario with the 14 NCP indicators selected in the first sensitivity analysis, and scenarios in which one NCP indicator or one NCP category was removed. Again, for each scenario, we generated optimal protection solutions that targeted 5-75%, incremented by 5%, of each included NCP. We then compared each solution with the all-NCP solution, quantifying their dissimilarity at each target, and calculated the AUC-EMD. The most dissimilar solutions, those with the highest AUC-EMD, revealed which NCP were most influential to the all-NCP solution.
 
 ::: {#suppfiga-workflow width=90%}
 
@@ -285,6 +287,7 @@ Land tenure can be broadly defined as the relationship between humans and land, 
 | Other private lands                 | Privately owned lands that have no known easements or other protections. They may be owned and managed by by an individual, a corporation, or any non-governmental organization, or owned by any of these parties and managed by non-owners.                                                                                                                                                           | These lands have the lowest legal restrictions on land use and subsequent NCP change.                                                                                        | @blmSMA     |
 
 Land tenure categories used in our analysis of the Snake River Plain, Idaho, and their susceptibility to land use and NCP changes.
+
 :::
 
 \newpage
@@ -292,6 +295,7 @@ Land tenure categories used in our analysis of the Snake River Plain, Idaho, and
 ## Average size of agricultural easements
 
 ::: {#supptbla-easement-size}
+
 | Database                                        | Mean easement size (sq km) | Median easement size (sq km) |
 |-------------------------------------------------|----------------------------|------------------------------|
 | Protected Agricultural Lands Database (PALD)    | 0.7                        | 0.2                          |
@@ -316,9 +320,12 @@ The average size of easements differs based on the purpose and the focus area. T
 
 ## Land Use Data {#sec-land-use-data}
 
-Land use data were required for the InVEST carbon storage, nutrient delivery ratio, and habitat quality models, and were also used in the crop provision, livestock feed provision, crop value, and recreation models. We used the American Farmland Trust's Farms Under Threat 2040 land use data in this analysis [available by request at https://csp-fut.appspot.com/, @hunter2022; @theobald2018]. One feature of these data is the low-density residential [LDR] category, which identifies land uses that are present in locations dominated by residential land use with low densities of houses [@theobald2018]. We retained these categories in our models, as we hypothesized that NCP in these areas would vary from locations with less residential land use. However, in @fig-studyarea-2, we collapsed land use categories in LDR areas into their primary identified land use (e.g. Cropland in LDR became Cropland) for ease of visualization. LDR is most common on the edges of cities, of which there are few in our study area, and the LDR category was barely visible. These data, including LDR, can be visualized and explored at https://development2040.farmland.org/, where they are titled "Baseline Scenario."
+Land use data were required for the InVEST carbon storage, nutrient delivery ratio, and habitat quality models, and were also used in the crop provision, livestock feed provision, crop value, and recreation models. We used the American Farmland Trust's Farms Under Threat 2040 [FUT 2040] land use data in this analysis [available by request at https://csp-fut.appspot.com/, @hunter2022; @theobald2018]. The FUT 2040 dataset relies primarily on the 2016 National Land Cover Datadase [NLCD], supplemented by other datasets, to create continuous maps of National Resource Inventory [NRI] categories, which are point-based estimates available only at the county level or coarser [@theobald2018]. @theobald2018 validated the FUT 2040 dataset against the NRI estimates and found 87% spatial agreement. The FUT 2040 estimates most diverge from the NRI estimates in the woodland and pastureland classes [@theobald2018]. The woodland class very rarely occurs in our study area (@supptblb-land-use), but it should be noted that NCP estimates associated with the pastureland class in this analysis may be more influenced by land cover class inaccuracy compared to other land use/land cover categories. We follow the scale recommendations of @theobald2018 by using a minimum mapping unit >100 acres and conducting our analysis at a multi-county scale. Because of data uncertainty in the land use data and NCP models, we elect to report our results as a summary of the study area rather than discussing fine-scale patterns.
+
+One feature of these data is the low-density residential [LDR] category, which identifies land uses that are present in locations dominated by residential land use with low densities of houses [@theobald2018]. We retained these categories in our models, as we hypothesized that NCP in these areas would vary from locations with less residential land use. However, in @fig-studyarea-2, we collapsed land use categories in LDR areas into their primary identified land use (e.g. Cropland in LDR became Cropland) for ease of visualization. LDR is most common on the edges of cities, of which there are few in our study area, and the LDR category was barely visible. The LDR category is based on census block-level housing density, and thus is subject to inaccuracy especially when census blocks are large such as in the Western U.S [@theobald2018]. To account for this, we use both the underlying land cover/land use class and the LDR designation in our NCP models (e.g. Cropland in LDR rather than LDR). These data, including LDR, can be visualized and explored at https://development2040.farmland.org/, where they are titled "Baseline Scenario."
 
 \newpage
+
 ::: {#supptblb-land-use}
 
 {{< embed notebooks/study-area-map.qmd#tbl-land-use >}}
@@ -347,6 +354,7 @@ For the @spawn2020 global maps of biomass C density in Mg C/ha, we used the sum 
 For the @hengl2018 global maps of soil organic C stock at soil depths from 0-200cm, we added SOC stock from soil depths 0-10c, 10-30cm, 30-60cm, 60-100cm, and 100-200cm together for the total SOC stock at depths 0-200cm. We used a depth to bedrock data layer from @shangguan2016 to exclude soil layers where bedrock is present from a pixel's sum, resulting in more conservative SOC stock estimates.
 
 \newpage
+
 ::: {#supptblb-carbon-params}
 
 ```{r}
@@ -586,6 +594,6 @@ Percent of each NCP indicator provided by each land tenure category. All NCP cat
 
 {{< embed notebooks/allNCP-sens-analysis.qmd#tbl-sol-diffs >}}
 
-Attributes of the all-NCP solution and the "leave-one-out" solutions depicted in Figures [-@fig-diff-maps-food]-[-@fig-diff-maps-carbon]
+Attributes of the all-NCP solution and the "leave-one-out" solutions depicted in Figures [-@fig-diff-maps-food]-[-@fig-diff-maps-carbon].
 
 :::

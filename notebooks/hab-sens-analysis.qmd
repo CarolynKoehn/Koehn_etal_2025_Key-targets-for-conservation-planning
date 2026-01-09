@@ -141,7 +141,7 @@ low_auc_series <- low_auc_series %>%
          `Leaves Out` = str_replace_all(`Leaves Out`, "Biodiversity_Value", "Biodiversity Value"),
          `Leaves Out` = str_replace_all(`Leaves Out`, "InVEST", "Habitat Quality")) %>%
   select(-leaves_out) %>%
-  rename("AUC" = "auc")
+  rename("AUC-EMD" = "auc")
 
 emd_plot <- ggplot(emd_series, aes(x=target, y=emd, group=as.factor(config))) +
   geom_line(color="gray80") +
@@ -168,7 +168,7 @@ filter(emd_series, target==30 &
   select(-c(config, target_label))
 ```
 
-With so many layers, there may be a "good enough" solution with much fewer layers. Here, we list the lowest AUC values for each possible number of inputs. A solution with fewer inputs is preferred computationally.
+With so many layers, there may be a "good enough" solution with much fewer layers. Here, we list the lowest AUC-EMD values for each possible number of inputs. A solution with fewer inputs is preferred computationally.
 
 ```{r}
 #| label: tbl-habitat-auc
@@ -183,6 +183,6 @@ auc_table <- left_join(auc_series, grid_out) %>%
   mutate(across(Landscape_Condition:InVEST, ~ifelse(.x==0, "No", "Yes")))
 
 knitr::kable(auc_table, digits = 4, align="l",
-             col.names = c("AUC", "Num Inputs", "Landscape Condition", "Terrestrial Species of Concern", "Wetland / Riparian", "Ecological Connectivity", "Ecological Integrity", "Terrestrial Resilience", "Biodiversity Value", "Habitat Quality"))
+             col.names = c("AUC-EMD", "Num Inputs", "Landscape Condition", "Terrestrial Species of Concern", "Wetland / Riparian", "Ecological Connectivity", "Ecological Integrity", "Terrestrial Resilience", "Biodiversity Value", "Habitat Quality"))
 ```
 

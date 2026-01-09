@@ -34,7 +34,7 @@ emd_series <- emd_series %>%
            (NCP_Cat == "Food" & config == 13) |
            (NCP_Cat == "Water Quality" & config == 2) |
            (NCP_Cat == "Habitat" & config == 53)),
-           "Low AUC Solution Selected", "Solutions Not Selected"))
+           "Low AUC-EMD Solution Selected", "Solutions Not Selected"))
 
 chosen_df <- emd_series %>%
   filter((NCP_Cat == "C Stock Protection" & config == 5) |

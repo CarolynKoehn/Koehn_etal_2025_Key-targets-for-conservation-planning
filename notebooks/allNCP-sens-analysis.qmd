@@ -128,7 +128,7 @@ First, we would like to see which configurations of inputs have the highest diff
 
 ```{r}
 #| label: fig-loo-emd
-#| fig-cap: "Sensitivity of the solution as a function of target protection, measured by Earth Mover's Distance, a spatial similarity measure. The six solutions with the highest area under the Earth Mover’s Distance curve [AUC-EMD] are the most influential, and are depicted with colored lines. The legend reports the area under the curve values for these scenarios and the inputs that these scenarios omit. The lower-sensitivity NCP categories are shown in gray."
+#| fig-cap: "Sensitivity of the solution as a function of target protection, measured by Earth Mover's Distance, a spatial similarity measure. The six solutions with the highest area under the Earth Mover’s Distance curve [AUC-EMD] are the most influential, and are depicted with colored lines. The legend reports the area under the EMD curve values for these scenarios and the inputs that these scenarios omit. The lower-sensitivity NCP categories are shown in gray."
 #| fig-height: 4.75
 #| fig-width: 6.85
 
@@ -612,7 +612,7 @@ sol_diff_tbl_display <- sol_diffs_table %>%
   t() %>%
   as.data.frame() %>%
   na.omit() %>%
-  mutate(Attribute = c("Area (sq km)", "Percent cropland", "Percent pastureland", "Percent rangeland", "Percent forestland", "Percent federal land", "Percent private land", "Percent state land", "Percent PAL", "Percent other easements", "Percent corn-growing land", "Percent barley-growing land", "Percent spring wheat-growing land", "Percent winter wheat-growing land", "Percent alfalfa-growing land", "Percent other hay-growing land", "Percent sugarbeet-growing land", "Percent dry bean-growing land", "Percent potato-growing land", "Perent fallow land", "Percent triticale-growing land", "Solution Cost (mil USD)", "Percent cost reduction by removing NCP", "Percent soil organic carbon difference from removing NCP", "Percent carbon storage difference from removing NCP", "Percent crop provision difference from removing NCP", "Percent livestock crop provision difference from removing NCP", "Percent agricultural potential difference from removing NCP"), .before=all_layers)
+  mutate(Attribute = c("Area (sq km)", "Percent cropland", "Percent pastureland", "Percent rangeland", "Percent forestland", "Percent federal land", "Percent private land", "Percent state land", "Percent PAL", "Percent other easements", "Percent corn-growing land", "Percent barley-growing land", "Percent spring wheat-growing land", "Percent winter wheat-growing land", "Percent alfalfa-growing land", "Percent other hay-growing land", "Percent sugarbeet-growing land", "Percent dry bean-growing land", "Percent potato-growing land", "Perent fallow land", "Percent triticale-growing land", "Solution Cost (mil USD)", "Percent cost difference by removing NCP", "Percent soil organic carbon difference from removing NCP", "Percent carbon storage difference", "Percent crop provision difference", "Percent livestock crop provision difference", "Percent agricultural potential difference"), .before=all_layers)
 
 knitr::kable(sol_diff_tbl_display, digits=1,
              row.names = FALSE,

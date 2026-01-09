@@ -119,7 +119,7 @@ low_auc_series <- low_auc_series %>%
   mutate(`Leaves Out` = str_replace_all(leaves_out, "Retention", "N Retention Capacity"),
          `Leaves Out` = str_replace_all(`Leaves Out`, "Nitrates", "Nitrate Rank")) %>%
   select(-leaves_out) %>%
-  rename("AUC" = "auc")
+  rename("AUC-EMD" = "auc")
 
 emd_plot <- ggplot(emd_series, aes(x=target, y=emd, group=as.factor(config))) +
   geom_line(color="gray80") +

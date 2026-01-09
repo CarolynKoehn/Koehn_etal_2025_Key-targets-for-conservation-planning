@@ -117,7 +117,7 @@ low_auc_series <- low_auc_series %>%
   mutate(`Leaves Out` = str_replace_all(leaves_out, "RecProb_Hooftman", "Rec prob (Hooftman et al.)"),
          `Leaves Out` = str_replace_all(`Leaves Out`, "RecProb_region", "Rec prob (regional est)")) %>%
   select(-leaves_out) %>%
-  rename("AUC" = "auc")
+  rename("AUC-EMD" = "auc")
 
 emd_plot <- ggplot(emd_series, aes(x=target, y=emd, group=as.factor(config))) +
   geom_line(color="gray80") +
