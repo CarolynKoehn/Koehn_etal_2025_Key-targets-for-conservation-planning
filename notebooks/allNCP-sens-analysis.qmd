@@ -214,17 +214,9 @@ Save as image:
 ```{r}
 #| eval: false
 
-png(filename = "../figures/Figure_4.png",
-    width = 6.85,
-    height = 5.75,
-    units = "in",
-    res = 1000)
-figure4
-dev.off()
-
 cairo_ps(filename = "../figures/Figure_4.eps",
     width = 6.85,
-    height = 5.75,
+    height = 4.75,
     fallback_resolution = 1200)
 print(figure4)
 dev.off()
@@ -612,7 +604,7 @@ sol_diff_tbl_display <- sol_diffs_table %>%
   t() %>%
   as.data.frame() %>%
   na.omit() %>%
-  mutate(Attribute = c("Area (sq km)", "Percent cropland", "Percent pastureland", "Percent rangeland", "Percent forestland", "Percent federal land", "Percent private land", "Percent state land", "Percent PAL", "Percent other easements", "Percent corn-growing land", "Percent barley-growing land", "Percent spring wheat-growing land", "Percent winter wheat-growing land", "Percent alfalfa-growing land", "Percent other hay-growing land", "Percent sugarbeet-growing land", "Percent dry bean-growing land", "Percent potato-growing land", "Perent fallow land", "Percent triticale-growing land", "Solution Cost (mil USD)", "Percent cost difference by removing NCP", "Percent soil organic carbon difference from removing NCP", "Percent carbon storage difference", "Percent crop provision difference", "Percent livestock crop provision difference", "Percent agricultural potential difference"), .before=all_layers)
+  mutate(Attribute = c("Area (sq km)", "Percent cropland", "Percent pastureland", "Percent rangeland", "Percent forestland", "Percent federal land", "Percent private land", "Percent state land", "Percent PAL", "Percent other easements", "Percent corn-growing land", "Percent barley-growing land", "Percent spring wheat-growing land", "Percent winter wheat-growing land", "Percent alfalfa-growing land", "Percent other hay-growing land", "Percent sugarbeet-growing land", "Percent dry bean-growing land", "Percent potato-growing land", "Percent fallow land", "Percent triticale-growing land", "Solution Cost (mil USD)", "Percent cost difference by removing NCP", "Percent soil organic carbon difference from removing NCP", "Percent carbon storage difference", "Percent crop provision difference", "Percent livestock crop provision difference", "Percent agricultural potential difference"), .before=all_layers)
 
 knitr::kable(sol_diff_tbl_display, digits=1,
              row.names = FALSE,
@@ -714,15 +706,15 @@ diff_plot_crops <- subset(sol_diffs_plot,
         plot.tag.position = c(0.95, 0.95))
 
 layout <- "
-AAAAADDDD
-AAAAADDDD
-AAAAADDDD
-BBBBBEEEE
-BBBBBEEEE
-BBBBBEEEE
-CCCCCCFFF
-CCCCCCGHI
-CCCCCCJKL
+AAAAADDDDD
+AAAAADDDDD
+AAAAADDDDD
+BBBBBEEEEE
+BBBBBEEEEE
+BBBBBEEEEE
+CCCCCC#FFF
+CCCCCC#GHI
+CCCCCC#JKL
 "
 
 all_layer_plot + 
@@ -731,15 +723,44 @@ all_layer_plot +
   diff_plot_landuse + 
   diff_plot_crops + 
   grid::textGrob("No-Food compared to All-NCP:") +
-  grid::textGrob(paste0("Cost:\n\U1F847", round(sol_diff_tbl_display["PercCostReduction", "no_food"], 0)*-1, "%")) +
+  grid::textGrob(paste0("Cost:\n", round(sol_diff_tbl_display["PercCostReduction", "no_food"], 0), "%")) +
   plot_spacer() +
-  grid::textGrob(paste0("Crop\nProvision:\n\U1F847", round(sol_diff_tbl_display["PercCropProvReduction", "no_food"], 0)*-1, "%")) +
-  grid::textGrob(paste0("Livestock\nCrop\nProvision:\n\U1F847", round(sol_diff_tbl_display["PercLvstckCropProvReduction", "no_food"], 0)*-1, "%")) +
+  grid::textGrob(paste0("Crop\nProvision:\n", round(sol_diff_tbl_display["PercCropProvReduction", "no_food"], 0), "%")) +
+  grid::textGrob(paste0("Livestock\nCrop\nProvision:\n", round(sol_diff_tbl_display["PercLvstckCropProvReduction", "no_food"], 0), "%")) +
   plot_spacer() +
-  grid::textGrob(paste0("Agricultural\nPotential:\n\U1F847", round(sol_diff_tbl_display["PercPVRReduction", "no_food"], 0)*-1, "%")) +
+  grid::textGrob(paste0("Agricultural\nPotential:\n", round(sol_diff_tbl_display["PercPVRReduction", "no_food"], 0), "%")) +
   plot_layout(design=layout, 
-              widths=c(1,1,1,1,1,0.5,1.3,-1.3,1),
+              widths=c(1,1,1,1,1.6,0.1,0.5,1.3,-1.3,1),
               heights = rep(c(-0.1,0.9,1), 3))
+```
+
+Save as image:
+
+```{r}
+#| eval: false
+
+cairo_ps(filename = "../figures/Figure_5.eps",
+    width = 8,
+    height = 9,
+    fallback_resolution = 1200)
+
+print(all_layer_plot + 
+  no_food_plot + 
+  all_minus_food_plot + 
+  diff_plot_landuse + 
+  diff_plot_crops + 
+  grid::textGrob("No-Food compared to All-NCP:") +
+  grid::textGrob(paste0("Cost:\n", round(sol_diff_tbl_display["PercCostReduction", "no_food"], 0), "%")) +
+  plot_spacer() +
+  grid::textGrob(paste0("Crop\nProvision:\n", round(sol_diff_tbl_display["PercCropProvReduction", "no_food"], 0), "%")) +
+  grid::textGrob(paste0("Livestock\nCrop\nProvision:\n", round(sol_diff_tbl_display["PercLvstckCropProvReduction", "no_food"], 0), "%")) +
+  plot_spacer() +
+  grid::textGrob(paste0("Agricultural\nPotential:\n", round(sol_diff_tbl_display["PercPVRReduction", "no_food"], 0), "%")) +
+  plot_layout(design=layout, 
+              widths=c(1,1,1,1,1.6,0.1,0.5,1.3,-1.3,1),
+              heights = rep(c(-0.1,0.9,1), 3)))
+
+dev.off()
 ```
 
 ```{r}
@@ -836,12 +857,12 @@ diff_plot_crops <- subset(sol_diffs_plot,
         plot.tag.position = c(0.95, 0.95))
 
 layout <- "
-AAAAADDDD
-AAAAADDDD
-BBBBBEEEE
-BBBBBEEEE
-CCCCCCFHI
-CCCCCCJKL
+AAAAADDDDD
+AAAAADDDDD
+BBBBBEEEEE
+BBBBBEEEEE
+CCCCCC#FHI
+CCCCCC#JKL
 "
 
 all_layer_plot + 
@@ -851,14 +872,40 @@ all_layer_plot +
   diff_plot_crops +
   free(wrap_elements(grid::textGrob("No-C Stock\nProtection\ncompared\nto All-NCP:"))) +
   plot_spacer() +
-  grid::textGrob(paste0("Cost:\n\U1F847", round(sol_diff_tbl_display["PercCostReduction", "no_climmit"], 0)*-1, "%")) +
-  grid::textGrob(paste0("Soil\nOrganic\nCarbon:\n\U1F847", round(sol_diff_tbl_display["PercSOCReduction", "no_climmit"], 0)*-1, "%")) +
+  grid::textGrob(paste0("Cost:\n", round(sol_diff_tbl_display["PercCostReduction", "no_climmit"], 0), "%")) +
+  grid::textGrob(paste0("Soil\nOrganic\nCarbon:\n", round(sol_diff_tbl_display["PercSOCReduction", "no_climmit"], 0), "%")) +
   plot_spacer() +
-  grid::textGrob(paste0("Carbon\nStorage:\n\U1F847", round(sol_diff_tbl_display["PercCStorReduction", "no_climmit"], 0)*-1, "%")) +
+  grid::textGrob(paste0("Carbon\nStorage:\n", round(sol_diff_tbl_display["PercCStorReduction", "no_climmit"], 0), "%")) +
   plot_layout(design=layout, 
-              widths=c(1,1,1,1,0.8,0.2,2,-1.5,1))
+              widths=c(1,1,1.3,1,1,1,0.5,2,-1.75,1))
 ```
 
+Save as image:
+
+```{r}
+#| eval: false
+
+cairo_ps(filename = "../figures/Figure_6.eps",
+    width = 8,
+    height = 9,
+    fallback_resolution = 1200)
+
+print(all_layer_plot + 
+  no_clim_plot + 
+  all_minus_clim_plot + 
+  diff_plot_landuse + 
+  diff_plot_crops +
+  free(wrap_elements(grid::textGrob("No-C Stock\nProtection\ncompared\nto All-NCP:"))) +
+  plot_spacer() +
+  grid::textGrob(paste0("Cost:\n", round(sol_diff_tbl_display["PercCostReduction", "no_climmit"], 0), "%")) +
+  grid::textGrob(paste0("Soil\nOrganic\nCarbon:\n", round(sol_diff_tbl_display["PercSOCReduction", "no_climmit"], 0), "%")) +
+  plot_spacer() +
+  grid::textGrob(paste0("Carbon\nStorage:\n", round(sol_diff_tbl_display["PercCStorReduction", "no_climmit"], 0), "%")) +
+  plot_layout(design=layout, 
+              widths=c(1,1,1.3,1,1,1,0.5,2,-1.75,1)))
+
+dev.off()
+```
 
 <!--
 
@@ -983,23 +1030,4 @@ all_layer_plot + no_food_plot + no_clim_plot + diff_plot_landuse + diff_plot_cro
 
 -->
 
-Save as image:
 
-```{r}
-#| eval: false
-
-png(filename = "../figures/Figure_5.png",
-    width = 8,
-    height = 9,
-    units = "in",
-    res = 1000)
-all_layer_plot + no_food_plot + no_clim_plot + diff_plot_landuse + diff_plot_crops + diff_plot_tenure  + plot_layout(design=layout, widths=c(1,0.1,1))
-dev.off()
-
-cairo_ps(filename = "../figures/Figure_5.eps",
-    width = 8,
-    height = 9,
-    fallback_resolution = 1200)
-print(all_layer_plot + no_food_plot + no_clim_plot + diff_plot_landuse + diff_plot_crops + diff_plot_tenure  + plot_layout(design=layout, widths=c(1,0.1,1)))
-dev.off()
-```

@@ -65,14 +65,6 @@ Save as image:
 ```{r}
 #| eval: false
 
-png(filename = "../figures/Figure_3.png",
-    width = 6.85,
-    height = 4.75,
-    units = "in",
-    res = 1000)
-figure3
-dev.off()
-
 cairo_ps(filename = "../figures/Figure_3.eps",
     width = 6.85,
     height = 4.7,
